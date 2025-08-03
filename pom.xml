@@ -13,6 +13,7 @@
         <maven.compiler.target>24</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
@@ -42,4 +43,45 @@
             <version>1.16.1</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.9.3.2</version>
+                <configuration>
+                    <effort>Max</effort> <!-- Уровень детализации -->
+                    <threshold>Low</threshold> <!-- Минимальный уровень ошибки -->
+                    <failOnError>true</failOnError> <!-- Остановка сборки при ошибках -->
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase> <!-- Запуск при сборке -->
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <configLocation>google_checks.xml</configLocation> <!-- или путь к своему файлу -->
+                    <encoding>UTF-8</encoding>
+                    <failOnViolation>true</failOnViolation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
