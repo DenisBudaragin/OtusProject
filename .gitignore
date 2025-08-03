@@ -5,3 +5,8 @@ build/
 # IDE
 .idea/
 *.iml
+
+# chromeDriver
+/chromedriver
+/LICENSE.chromedriver
+/THIRD_PARTY_NOTICES.chromedriver

@@ -1,12 +1,10 @@
 package main;
 
-import helpers.TestUtils;
 import helpers.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import  helpers.TestUtils.*;
 
 import java.util.List;
 

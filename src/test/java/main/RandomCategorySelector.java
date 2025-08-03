@@ -35,7 +35,8 @@ public class RandomCategorySelector extends WebDriverManager {
         categoryLink.click();
 
         // 3. Собираем все курсы в категории
-        List<WebElement> courseElements = driver.findElements(By.xpath("//*[@id=\"__next\"]/div[1]/div[3]/div/nav/div[3]/div/div/div[1]/div/div/a"));
+        List<WebElement> courseElements = driver.findElements(By.xpath("\n" +
+                "//*[@id=\"__next\"]/div[1]/div[1]/div/nav/div[3]/div/div/div[1]/div/div/a"));
         // Проверяем что курсы есть
         assertFalse(courseElements.isEmpty(), "В категории нет доступных курсов");
 
