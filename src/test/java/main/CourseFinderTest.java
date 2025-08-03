@@ -6,13 +6,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import java.util.List;
 
+import static helpers.Config.*;
+
 public class CourseFinderTest extends WebDriverManager {
-
-    private final String CATALOG_URL = "https://otus.ru/catalog/courses";
-    private final String COURSE_NAME = "SRE практики и инструменты"; // Замените на имя курса для поиска
-    private final String COURSE_XPATH = "//h6/div[contains(text(), 'SRE практики и инструменты')]"; // Замените на имя курса для поиска
-
-
     @Test
     public void testCourseFinder() {
         // 1. Открыть страницу каталога курсов

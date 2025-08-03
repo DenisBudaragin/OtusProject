@@ -6,15 +6,10 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import static asserts.Assertions.assertNoDateOnlyCourses;
+import static helpers.Config.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CourseDateSearcherTest {
-
-    private static final String CATALOG_URL = "https://otus.ru/catalog/courses";
-
-    private static final DateTimeFormatter DATE_FORMATTER =
-            DateTimeFormatter.ofPattern("d MMMM, yyyy", new Locale("ru"));
-
     @Test
     public void testEarliestAndLatestCourses() throws IOException {
         // 1. Получаем список всех курсов

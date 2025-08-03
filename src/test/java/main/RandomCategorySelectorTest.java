@@ -8,15 +8,13 @@ import org.testng.annotations.Test;
 import java.util.Random;
 import java.util.List;
 import static asserts.Assertions.assertUrlsAfterDelimitersEqual;
+import static helpers.Config.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RandomCategorySelectorTest extends WebDriverManager {
-    private final String CATALOG_URL = "https://otus.ru";
-    private static final String CATEGORY_NAME = "Обучение";
-
     @Test
     public void shouldReturnCourseWithValidCategory() {
-        driver.get(CATALOG_URL);
+        driver.get(OTUS_MAIN_PAGE);
         new WebDriverWait(driver, 10)
                 .until(d -> ((JavascriptExecutor)d)
                         .executeScript("return document.readyState").equals("complete"));
