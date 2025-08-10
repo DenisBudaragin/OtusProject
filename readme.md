@@ -1,4 +1,2 @@
-Тесты запускаются пока просто из файликов:
-CourseDateSearcher
-CourseFinder
-RandomCategorySelector
+Запуск тестов возможен через 
+mvn test
