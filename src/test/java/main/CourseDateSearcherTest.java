@@ -14,7 +14,12 @@ public class CourseDateSearcherTest {
     public void testEarliestAndLatestCourses() throws IOException {
         // 1. Получаем список всех курсов
         CourseDataSearcherHelper courseHelper = new CourseDataSearcherHelper();
-        List<Course> courses = courseHelper.parseCourses(CATALOG_URL);
+
+        List<Course> courses = courseHelper.parseCourses("https://otus.ru/catalog/courses", element -> {
+            String title = element.text();
+            String dateText = element.lastElementChild().text();
+            return new Course(title, dateText);
+        });
 
         assertFalse(courses.isEmpty(), "Список курсов не должен быть пустым");
 

@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public class Config {
-    public static final String CATALOG_URL = "https://otus.ru/catalog/courses";
+//    public static final String CATALOG_URL = "https://otus.ru/catalog/courses";
 
     public static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("d MMMM, yyyy", new Locale("ru"));

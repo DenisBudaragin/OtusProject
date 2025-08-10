@@ -13,10 +13,10 @@ public class CourseFinderTest extends BaseTest {
     @Test
     public void testCourseFinder() {
         // 1. Открыть страницу каталога курсов
-        driver.get(CATALOG_URL);
+        driver.get("https://otus.ru/catalog/courses");
 
         // 2. Найти все элементы курсов
-        List<WebElement> courseElements = driver.findElements(By.xpath(COURSE_XPATH));
+        List<WebElement> courseElements = findElements(By.xpath(COURSE_XPATH));
 
         // 3. Используем Stream API для поиска курса по имени
         WebElement targetCourse = courseElements.stream()

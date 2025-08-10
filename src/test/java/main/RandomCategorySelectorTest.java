@@ -15,9 +15,10 @@ public class RandomCategorySelectorTest extends BaseTest {
         driver.get(OTUS_MAIN_PAGE);
 
         // 2. Находим и кликаем по разделу "Обучение"
-        WebElement categoryLink = driver.findElement(
+        WebElement categoryLink = findElement(
                 By.xpath(String.format("//*[text()='Обучение']", CATEGORY_NAME))
         );
+
         categoryLink.click();
 
         // 3. Собираем все курсы в категории
