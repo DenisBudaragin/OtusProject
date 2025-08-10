@@ -1,9 +1,7 @@
 package main;
-import helpers.WebDriverManager;
+import helpers.BaseTest;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.Test;
 import java.util.Random;
 import java.util.List;
@@ -11,13 +9,10 @@ import static asserts.Assertions.assertUrlsAfterDelimitersEqual;
 import static helpers.Config.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RandomCategorySelectorTest extends WebDriverManager {
+public class RandomCategorySelectorTest extends BaseTest {
     @Test
     public void shouldReturnCourseWithValidCategory() {
         driver.get(OTUS_MAIN_PAGE);
-        new WebDriverWait(driver, 10)
-                .until(d -> ((JavascriptExecutor)d)
-                        .executeScript("return document.readyState").equals("complete"));
 
         // 2. Находим и кликаем по разделу "Обучение"
         WebElement categoryLink = driver.findElement(

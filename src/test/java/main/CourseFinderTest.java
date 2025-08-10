@@ -1,5 +1,5 @@
 package main;
-import helpers.WebDriverManager;
+import helpers.BaseTest;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.testng.Assert;
@@ -8,7 +8,8 @@ import java.util.List;
 
 import static helpers.Config.*;
 
-public class CourseFinderTest extends WebDriverManager {
+public class CourseFinderTest extends BaseTest {
+
     @Test
     public void testCourseFinder() {
         // 1. Открыть страницу каталога курсов
@@ -31,7 +32,7 @@ public class CourseFinderTest extends WebDriverManager {
 
         // 5. Проверяем, что открыта страница верного курса
         String actualCourseName = driver.findElement(By.xpath("\n" +
-                "//h1[text()='SRE практики и инструменты']")).getText();
+                "//h1[text()='3D Artist']")).getText();
         Assert.assertEquals(actualCourseName, COURSE_NAME,
                 "Открыта страница неверного курса. Ожидалось: " + COURSE_NAME +
                         ", но получено: " + actualCourseName);

@@ -9,8 +9,8 @@ public class Config {
     public static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("d MMMM, yyyy", new Locale("ru"));
 
-    public static final String COURSE_NAME = "SRE практики и инструменты"; // Замените на имя курса для поиска
-    public static final String COURSE_XPATH = "//h6/div[contains(text(), 'SRE практики и инструменты')]"; // Замените на имя курса для поиска
+    public static final String COURSE_NAME = "3D Artist"; // Замените на имя курса для поиска
+    public static final String COURSE_XPATH = "//h6/div[contains(text(), '3D Artist')]"; // Замените на имя курса для поиска
     public static final String OTUS_MAIN_PAGE = "https://otus.ru";
     public static final String CATEGORY_NAME = "Обучение";
 }
