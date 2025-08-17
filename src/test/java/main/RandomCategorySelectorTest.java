@@ -1,11 +1,11 @@
 package main;
+import asserts.RandomCategorySelectorAsserts;
 import helpers.BaseTest;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import java.util.Random;
 import java.util.List;
-import static asserts.Assertions.assertUrlsAfterDelimitersEqual;
 import static helpers.Config.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,6 +40,6 @@ public class RandomCategorySelectorTest extends BaseTest {
         String actualUrl = driver.getCurrentUrl();
 
         // 7. Проверяем что мы на правильной странице
-        assertUrlsAfterDelimitersEqual(actualUrl, expectedUrl);
+        RandomCategorySelectorAsserts.assertUrlsAfterDelimitersEqual(actualUrl, expectedUrl);
     }
 }

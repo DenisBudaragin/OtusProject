@@ -1,15 +1,19 @@
 package main;
+import asserts.CourseDataSearcherAsserts;
 import helpers.CourseDataSearcherHelper;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.Course;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import static asserts.Assertions.assertNoDateOnlyCourses;
 import static helpers.Config.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CourseDateSearcherTest {
+    private static final Logger log = LoggerFactory.getLogger(CourseDateSearcherTest.class);
+
     @Test
     public void testEarliestAndLatestCourses() throws IOException {
         // 1. Получаем список всех курсов
@@ -37,8 +41,9 @@ public class CourseDateSearcherTest {
         );
 
         // 4. Проверяем данные на страницах курсов
-        assertNoDateOnlyCourses(earliestDateCourses);
-        assertNoDateOnlyCourses(coursesWithLatestDate);
+          CourseDataSearcherAsserts.assertNoDateOnlyCourses(earliestDateCourses);
+          CourseDataSearcherAsserts.assertNoDateOnlyCourses(coursesWithLatestDate);
+
     }
 }
 
