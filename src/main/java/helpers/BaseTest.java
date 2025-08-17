@@ -1,9 +1,9 @@
 package helpers;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import driver.WebDriverModule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
