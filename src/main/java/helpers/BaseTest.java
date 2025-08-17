@@ -1,22 +1,34 @@
 package helpers;
-import com.google.inject.Inject;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.Guice;
+
 import java.util.List;
 
-@Guice(modules = {WebDriverModule.class})
 public class BaseTest {
-    @Inject
-    protected WebDriver driver;
+    protected static WebDriver driver;
+    private static Injector injector;
 
-    @AfterSuite
-    public void tearDown() {
+    @BeforeAll
+    public static void setup() {
+        injector = Guice.createInjector(new WebDriverModule());
+        driver = injector.getInstance(WebDriver.class);
+    }
+
+    @AfterAll
+    public static void teardown() {
         if (driver != null) {
             driver.quit();
         }
+    }
+
+    public static Injector getInjector() {
+        return injector;
     }
 
     public List<WebElement> findElements(By locator) {

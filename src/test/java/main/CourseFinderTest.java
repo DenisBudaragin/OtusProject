@@ -1,23 +1,24 @@
 package main;
 import asserts.CourseFinderAsserts;
+import com.google.inject.Inject;
 import helpers.BaseTest;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static helpers.Config.*;
 
 public class CourseFinderTest extends BaseTest {
-
     @Test
     public void testCourseFinder() {
         // 1. Открыть страницу каталога курсов
         driver.get("https://otus.ru/catalog/courses");
 
         // 2. Найти все элементы курсов
-        List<WebElement> courseElements = findElements(By.xpath(COURSE_XPATH));
+        List<WebElement> courseElements = driver.findElements(By.xpath(COURSE_XPATH));
 
         // 3. Используем Stream API для поиска курса по имени
         WebElement targetCourse = courseElements.stream()
