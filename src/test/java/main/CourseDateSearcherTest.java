@@ -19,7 +19,7 @@ public class CourseDateSearcherTest {
         // 1. Получаем список всех курсов
         CourseDataSearcherHelper courseHelper = new CourseDataSearcherHelper();
 
-        List<Course> courses = courseHelper.parseCourses("https://otus.ru/catalog/courses", element -> {
+        List<Course> courses = courseHelper.parseCourses(OTUS_COURSES_PAGE, element -> {
             String title = element.text();
             String dateText = element.lastElementChild().text();
             return new Course(title, dateText);

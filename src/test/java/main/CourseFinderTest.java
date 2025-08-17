@@ -7,6 +7,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.testng.Assert;
 import org.junit.jupiter.api.Test;
+import pages.CoursesPage;
+import pages.MainPage;
+
 import java.util.List;
 
 import static helpers.Config.*;
@@ -15,7 +18,7 @@ public class CourseFinderTest extends BaseTest {
     @Test
     public void testCourseFinder() {
         // 1. Открыть страницу каталога курсов
-        driver.get("https://otus.ru/catalog/courses");
+        CoursesPage.openCoursesPage();
 
         // 2. Найти все элементы курсов
         List<WebElement> courseElements = driver.findElements(By.xpath(COURSE_XPATH));
