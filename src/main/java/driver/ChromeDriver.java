@@ -3,11 +3,10 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import java.util.concurrent.TimeUnit;
 
-public class WebDriverModule extends AbstractModule {
+public class ChromeDriver extends AbstractModule {
 
     @Override
     protected void configure() {
@@ -26,7 +25,7 @@ public class WebDriverModule extends AbstractModule {
         options.addArguments("--disable-infobars");
         options.addArguments("--no-sandbox");
 
-        WebDriver driver = new ChromeDriver(options);
+        WebDriver driver = new org.openqa.selenium.chrome.ChromeDriver(options);
         driver.manage().timeouts()
                 .implicitlyWait(10, TimeUnit.SECONDS);
 

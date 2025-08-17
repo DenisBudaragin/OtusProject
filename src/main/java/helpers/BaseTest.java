@@ -1,7 +1,7 @@
 package helpers;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import driver.WebDriverModule;
+import driver.ChromeDriver;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.openqa.selenium.By;
@@ -16,7 +16,7 @@ public class BaseTest {
 
     @BeforeAll
     public static void setup() {
-        injector = Guice.createInjector(new WebDriverModule());
+        injector = Guice.createInjector(new ChromeDriver());
         driver = injector.getInstance(WebDriver.class);
     }
 
