@@ -80,9 +80,11 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
-                    <configLocation>google_checks.xml</configLocation> <!-- или путь к своему файлу -->
-<!--                    <encoding>UTF-8</encoding>-->
-                    <failOnViolation>true</failOnViolation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <configLocation>${project.build.sourceDirectory}/../resources/checkstyle.xml</configLocation>
+<!--                    <configLocation>google_checks.xml</configLocation> &lt;!&ndash; или путь к своему файлу &ndash;&gt;-->
+<!--&lt;!&ndash;                    <encoding>UTF-8</encoding>&ndash;&gt;-->
+<!--                    <failOnViolation>true</failOnViolation>-->
                 </configuration>
                 <executions>
                     <execution>
