@@ -8,7 +8,7 @@ import pages.MainPage;
 
 import java.util.Random;
 import java.util.List;
-import static helpers.Config.*;
+import static configa.Config.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RandomCategorySelectorTest extends BaseTest {

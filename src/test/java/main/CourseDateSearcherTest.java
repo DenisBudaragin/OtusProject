@@ -6,9 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.Course;
 import java.io.IOException;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import static helpers.Config.*;
+import static configa.Config.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CourseDateSearcherTest {
