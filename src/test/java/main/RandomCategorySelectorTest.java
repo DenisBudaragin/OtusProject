@@ -4,8 +4,6 @@ import helpers.BaseTest;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.junit.jupiter.api.Test;
-import pages.MainPage;
-
 import java.util.Random;
 import java.util.List;
 import static configa.Config.*;
@@ -16,7 +14,7 @@ public class RandomCategorySelectorTest extends BaseTest {
     @Test
     public void shouldReturnCourseWithValidCategory() {
         // 1. Открываем главную страницу
-        MainPage.openMainPage();
+        BaseTest.openPage(OTUS_COURSES_PAGE);
 
         // 2. Находим и кликаем по разделу "Обучение"
         WebElement categoryLink = findElement(

@@ -38,4 +38,8 @@ public class BaseTest {
     public WebElement findElement(By locator) {
         return driver.findElement(locator);
     }
+
+    public static void openPage(String pageAddress) {
+        driver.get(pageAddress);
+    }
 }

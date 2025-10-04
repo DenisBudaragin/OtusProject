@@ -4,8 +4,6 @@ import helpers.BaseTest;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.junit.jupiter.api.Test;
-import pages.CoursesPage;
-
 import java.util.List;
 
 import static configa.Config.*;
@@ -14,7 +12,7 @@ public class CourseFinderTest extends BaseTest {
     @Test
     public void testCourseFinder() {
         // 1. Открыть страницу каталога курсов
-        CoursesPage.openCoursesPage();
+        BaseTest.openPage(OTUS_COURSES_PAGE);
 
         // 2. Найти все элементы курсов
         List<WebElement> courseElements = driver.findElements(By.xpath(COURSE_XPATH));
