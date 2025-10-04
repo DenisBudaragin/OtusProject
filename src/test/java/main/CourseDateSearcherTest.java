@@ -1,48 +1,24 @@
 package main;
 import asserts.CourseDataSearcherAsserts;
-import helpers.CourseDataSearcherHelper;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pages.Courses;
 import utils.Course;
 import java.io.IOException;
 import java.util.*;
 import static configa.Config.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class CourseDateSearcherTest {
     private static final Logger log = LoggerFactory.getLogger(CourseDateSearcherTest.class);
 
     @Test
     public void testEarliestAndLatestCourses() throws IOException {
-        // 1. Получаем список всех курсов
-        CourseDataSearcherHelper courseHelper = new CourseDataSearcherHelper();
-
-        List<Course> courses = courseHelper.parseCourses(OTUS_COURSES_PAGE, element -> {
-            String title = element.text();
-            String dateText = element.lastElementChild().text();
-            return new Course(title, dateText);
-        });
-
-        assertFalse(courses.isEmpty(), "Список курсов не должен быть пустым");
-
-        // 2. Находим самый ранний и самый поздний курсы
-        List<Course> earliestDateCourses = courseHelper.findAllCoursesWithEarliestDate(courses, DATE_FORMATTER);
-        System.out.println("Ранние курсы:");
-        earliestDateCourses.stream()
-                .map(c -> String.format(c.getTitle()))
-                .forEach(System.out::println);
-
-        List<Course> coursesWithLatestDate = courseHelper.findAllCoursesWithLatestDate(courses, DATE_FORMATTER);
-        System.out.println("\nПоздние курсы:");
-        coursesWithLatestDate.forEach(c ->
-                System.out.println(c.getTitle())
-        );
-
-        // 4. Проверяем данные на страницах курсов
-          CourseDataSearcherAsserts.assertNoDateOnlyCourses(earliestDateCourses);
-          CourseDataSearcherAsserts.assertNoDateOnlyCourses(coursesWithLatestDate);
-
+        List<Course> courses = Courses.parseCoursesFromPage(OTUS_COURSES_PAGE);
+        List<Course> earliestСourses = Courses.getEarliestCourses(courses, DATE_FORMATTER);
+        List<Course> latestСourses = Courses.getLatestCourses(courses, DATE_FORMATTER);
+        CourseDataSearcherAsserts.assertNoDateOnlyCourses(earliestСourses);
+        CourseDataSearcherAsserts.assertNoDateOnlyCourses(latestСourses);
     }
 }
 

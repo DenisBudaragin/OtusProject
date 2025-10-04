@@ -1,11 +1,12 @@
 package helpers;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import utils.Course;
-
+import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -13,24 +14,45 @@ import java.util.*;
 import java.util.function.Function;
 
 public class CourseDataSearcherHelper {
-    public <T extends Course> List<T> parseCourses(String url, Function<Element, T> courseCreator) throws IOException {
+    public static <T extends Course> List<T> parseCourses(String url, Function<Element, T> courseCreator) throws IOException {
         List<T> courses = new ArrayList<>();
-        Document doc = Jsoup.connect(url).get();
-        Elements courseElements = doc.select("div.sc-18q05a6-0.incGfX > div > a");
 
-        for (Element courseElement : courseElements) {
-            String title = courseElement.text();
-            String dateText = courseElement.lastElementChild().text();
+        Connection connection = Jsoup.connect(url)
+                .timeout(60000) // 60 секунд
+                .ignoreHttpErrors(true)
+                .ignoreContentType(true)
+                .maxBodySize(0) // без ограничения размера
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
 
-            if (dateText != null) {
+        try {
+            Document doc = connection.get();
+            Elements courseElements = doc.select("div.sc-18q05a6-0.incGfX > div > a");
+
+            for (Element courseElement : courseElements) {
                 T course = courseCreator.apply(courseElement);
                 courses.add(course);
             }
+        } catch (SSLException e) {
+            // Повторная попытка без проверки SSL
+            System.out.println("SSL error, retrying without certificate validation...");
+            try {
+                Document doc = connection.followRedirects(false).get();
+                Elements courseElements = doc.select("div.sc-18q05a6-0.incGfX > div > a");
+
+                for (Element courseElement : courseElements) {
+                    T course = courseCreator.apply(courseElement);
+                    courses.add(course);
+                }
+            } catch (Exception ex) {
+                throw new IOException("Failed to parse courses after SSL retry", ex);
+            }
         }
+
         return courses;
     }
 
-    public List<Course> findAllCoursesWithEarliestDate(List<Course> courses, DateTimeFormatter dateFormat) {
+
+    public static List<Course> findAllCoursesWithEarliestDate(List<Course> courses, DateTimeFormatter dateFormat) {
         if (courses == null || courses.isEmpty()) {
             return Collections.emptyList();
         }
@@ -82,7 +104,7 @@ public class CourseDataSearcherHelper {
                 .getKey();
     }
 
-    public List<Course> findAllCoursesWithLatestDate(List<Course> courses, DateTimeFormatter dateFormat) {
+    public static List<Course> findAllCoursesWithLatestDate(List<Course> courses, DateTimeFormatter dateFormat) {
         if (courses == null || courses.isEmpty()) {
             return Collections.emptyList();
         }
