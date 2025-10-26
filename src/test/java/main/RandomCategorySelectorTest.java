@@ -11,7 +11,7 @@ public class RandomCategorySelectorTest extends BaseTest {
         MainPage.open();
         MainPage.clickOnCategory("Обучение");
         String actualUrl = MainPage.
-                clickRandomCourseInCategory("//*[@id=\"__next\"]/div[1]/div[1]/div/nav/div[3]/div/div/div[1]/div/div/a");
+                clickRandomCourseInCategory("//*[@id=\"__next\"]/div[1]/div[2]/div/nav/div[3]/div/div/div[1]/div/div/a");
         String expectedUrl = MainPage.getCurrentPageUrl();
         RandomCategorySelectorAsserts.assertUrlsAfterDelimitersEqual(expectedUrl, actualUrl);
     }
