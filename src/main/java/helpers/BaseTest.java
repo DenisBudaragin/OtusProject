@@ -14,17 +14,23 @@ public class BaseTest {
     protected static WebDriver driver;
     private static Injector injector;
 
-    @BeforeAll
     public static void setup() {
-        injector = Guice.createInjector(new ChromeDriver());
-        driver = injector.getInstance(WebDriver.class);
+        if (driver == null) {
+            injector = Guice.createInjector(new ChromeDriver());
+            driver = injector.getInstance(WebDriver.class);
+        }
     }
 
-    @AfterAll
     public static void teardown() {
         if (driver != null) {
             driver.quit();
+            driver = null;
+            injector = null;
         }
+    }
+
+    public static WebDriver getDriver() {
+        return driver;
     }
 
     public static Injector getInjector() {

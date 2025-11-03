@@ -10,8 +10,10 @@ import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class CourseDataSearcherHelper {
     public static <T extends Course> List<T> parseCourses(String url, Function<Element, T> courseCreator) throws IOException {
@@ -154,5 +156,25 @@ public class CourseDataSearcherHelper {
                         }
                 )
                 .getKey();
+    }
+
+    public static List<Course> findCoursesOnOrAfterDate(List<Course> courses, String targetDateStr, DateTimeFormatter formatter) {
+        if (courses == null || courses.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        LocalDate targetDate = LocalDate.parse(targetDateStr, formatter);
+
+        return courses.stream()
+                .filter(course -> {
+                    try {
+                        String dateStr = course.getStartDate().split("·")[0].trim();
+                        LocalDate courseStartDate = LocalDate.parse(dateStr, formatter);
+                        return !courseStartDate.isBefore(targetDate);
+                    } catch (Exception e) {
+                        return false;
+                    }
+                })
+                .collect(Collectors.toList());
     }
 }

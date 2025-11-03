@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CourseDataSearcherAsserts {
     public static void assertNoDateOnlyCourses(List<Course> courses) {
@@ -23,5 +24,12 @@ public class CourseDataSearcherAsserts {
                     }
             );
         }
+    }
+
+    public static void assertFilteredCourses(List<Course> filteredCourses, String courseDate) {
+        String RED = "\033[91m";
+        String RESET = "\033[0m";
+        Assertions.assertNotNull(filteredCourses, RED + "Список filteredCourses не должен быть null" + RESET);
+        assertFalse(filteredCourses.isEmpty(), RED + "Нет курсов на указанную дату " + courseDate + " или позже" + RESET);
     }
 }
