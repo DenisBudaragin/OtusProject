@@ -3,7 +3,7 @@ import asserts.CourseFinderAsserts;
 import helpers.BaseTest;
 import org.junit.jupiter.api.Test;
 import pages.CoursesPage;
-import static configa.Config.*;
+import static configs.Config.*;
 
 public class CourseFinderTest extends BaseTest {
     @Test

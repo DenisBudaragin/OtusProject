@@ -7,7 +7,7 @@ import pages.Courses;
 import utils.Course;
 import java.io.IOException;
 import java.util.*;
-import static configa.Config.*;
+import static configs.Config.*;
 
 public class CourseDateSearcherTest {
     private static final Logger log = LoggerFactory.getLogger(CourseDateSearcherTest.class);

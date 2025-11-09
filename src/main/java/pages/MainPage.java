@@ -10,7 +10,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Random;
 
-import static configa.Config.OTUS_MAIN_PAGE;
+import static configs.Config.OTUS_MAIN_PAGE;
 
 public class MainPage extends BaseTest {
     public static void open() {

@@ -1,4 +1,6 @@
-package configa;
+package configs;
+
+import helpers.RandomGenerator;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -14,4 +16,6 @@ public class Config {
     public static final String OTUS_MAIN_PAGE = "https://otus.ru";
     public static final String OTUS_COURSES_PAGE = "https://otus.ru/catalog/courses";
     public static final String CATEGORY_NAME = "Обучение";
+    public static final String BASE_URI = "https://petstore.swagger.io/v2";
+    public static String userName = "Name_" + RandomGenerator.generateRandomString(7);
 }
