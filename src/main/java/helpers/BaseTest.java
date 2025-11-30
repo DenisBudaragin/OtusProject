@@ -1,7 +1,7 @@
 package helpers;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import driver.ChromeDriver;
+import driver.WebDriverModule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.openqa.selenium.By;
@@ -11,17 +11,27 @@ import org.openqa.selenium.WebElement;
 import java.util.List;
 
 public class BaseTest {
-    protected static WebDriver driver;
-    private static Injector injector;
+    protected WebDriver driver; // убрали static
+    private Injector injector; // убрали static
+    private static BaseTest instance;
 
-    public static void setup() {
+    private BaseTest() {}
+
+    public static BaseTest getInstance() {
+        if (instance == null) {
+            instance = new BaseTest();
+        }
+        return instance;
+    }
+
+    public void setup() { // убрали static
         if (driver == null) {
-            injector = Guice.createInjector(new ChromeDriver());
+            injector = Guice.createInjector(new WebDriverModule()); // исправил на модуль
             driver = injector.getInstance(WebDriver.class);
         }
     }
 
-    public static void teardown() {
+    public void teardown() { // убрали static
         if (driver != null) {
             driver.quit();
             driver = null;
@@ -29,11 +39,11 @@ public class BaseTest {
         }
     }
 
-    public static WebDriver getDriver() {
+    public WebDriver getDriver() { // убрали static
         return driver;
     }
 
-    public static Injector getInjector() {
+    public Injector getInjector() { // убрали static
         return injector;
     }
 
@@ -41,7 +51,7 @@ public class BaseTest {
         return driver.findElements(locator);
     }
 
-    public static WebElement findElement(By locator) {
+    public WebElement findElement(By locator) { // убрали static
         return driver.findElement(locator);
     }
 }

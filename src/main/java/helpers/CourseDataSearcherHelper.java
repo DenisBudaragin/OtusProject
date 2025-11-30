@@ -5,6 +5,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import pages.Courses;
 import utils.Course;
 import javax.net.ssl.SSLException;
 import java.io.IOException;
@@ -14,6 +15,8 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static configa.Config.OTUS_COURSES_PAGE;
 
 public class CourseDataSearcherHelper {
     public static <T extends Course> List<T> parseCourses(String url, Function<Element, T> courseCreator) throws IOException {

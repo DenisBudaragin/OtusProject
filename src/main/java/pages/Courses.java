@@ -7,6 +7,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class Courses {
+    public static final String RESET = "\033[0m";
+    public static final String GREEN = "\033[92m";
+    public static final String RED = "\033[91m";
+
     public static List<Course> parseCoursesFromPage(String pageUrl) throws IOException {
         List<Course> courses = CourseDataSearcherHelper.parseCourses(pageUrl, element -> {
             String title = element.text();
@@ -19,7 +23,7 @@ public class Courses {
 
     public static List<Course> getEarliestCourses(List<Course> courses, DateTimeFormatter dateFormatter) {
         List<Course> earliestDateCourses = CourseDataSearcherHelper.findAllCoursesWithEarliestDate(courses, dateFormatter);
-        System.out.println("Ранние курсы:");
+        System.out.println(GREEN + "Ранние курсы:" + RESET);
         earliestDateCourses.stream()
                 .map(c -> String.format(c.getTitle()))
                 .forEach(System.out::println);
@@ -28,7 +32,7 @@ public class Courses {
 
     public static List<Course> getLatestCourses(List<Course> courses, DateTimeFormatter dateFormatter) {
         List<Course> coursesWithLatestDate = CourseDataSearcherHelper.findAllCoursesWithLatestDate(courses, dateFormatter);
-        System.out.println("\nПоздние курсы:");
+        System.out.println(RED + "\nПоздние курсы:" + RESET);
         coursesWithLatestDate.forEach(c ->
                 System.out.println(c.getTitle())
         );

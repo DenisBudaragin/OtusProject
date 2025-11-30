@@ -20,20 +20,29 @@ import java.util.List;
 
 import static configa.Config.*;
 
-public class CoursePageSteps extends BaseTest {
+public class CoursePageSteps {
+
+    private BaseTest baseTest;
+    private CoursesPage coursesPage;
+
+    public CoursePageSteps() {
+        this.baseTest = BaseTest.getInstance();
+        this.coursesPage = new CoursesPage(baseTest); // передаем baseTest в конструктор
+    }
+
     @Пусть("Я открываю браузер Chrome")
     public void openChromeBrowser() {
-        CoursesPage.open();
+        coursesPage.open();
     }
 
     @И("Найти курс с названием {string} и путём до элемента в дереве элементов {string}")
     public void searchCourseByName(String courseName, String courseXpath) {
-        CoursesPage.findAndClickCourseByName(courseName, courseXpath);
+        coursesPage.findAndClickCourseByName(courseName, courseXpath);
     }
 
     @Тогда("Проверить что открыта страница курса {string}")
     public void checkWebPage(String courseName) {
-        CourseFinderAsserts.assertCourseNameMatches(driver, courseName);
+        CourseFinderAsserts.assertCourseNameMatches(baseTest.getDriver(), courseName);
     }
 
     @И("Найти курс в указанную дату {string} или позже указанной даты")
@@ -58,4 +67,11 @@ public class CoursePageSteps extends BaseTest {
             );
         }
     }
+    @И("Найти курс с самой ранней и самой поздней датой старта")
+    public void findCourseByStartDate() throws IOException {
+        List<Course> courses = Courses.parseCoursesFromPage(OTUS_COURSES_PAGE);
+        List<Course> earliestСourses = Courses.getEarliestCourses(courses, DATE_FORMATTER);
+        List<Course> latestСourses = Courses.getLatestCourses(courses, DATE_FORMATTER);
+    }
+
 }

@@ -4,15 +4,21 @@ import io.cucumber.java.After;
 import io.cucumber.java.Before;
 
 public class Hooks {
+    private BaseTest baseTest;
+
+    public Hooks() {
+        this.baseTest = BaseTest.getInstance();
+    }
+
     @Before
-    public static void setup() {
-        if (BaseTest.getDriver() == null) {
-            BaseTest.setup();
+    public void setup() {
+        if (baseTest.getDriver() == null) {
+            baseTest.setup();
         }
     }
 
     @After
-    public static void teardown() {
-        BaseTest.teardown();
+    public void teardown() {
+        baseTest.teardown();
     }
 }
