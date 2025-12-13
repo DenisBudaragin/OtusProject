@@ -7,14 +7,14 @@ import pages.LessonPage;
 import pages.TeacherPopup;
 import org.assertj.core.api.Assertions;
 
-public class TeacherCarouselTest_Ed {
+public class TeacherCarouselTest {
     private final Page page;
     private final TestConfig config;
     private final LessonPage lessonPage;
     private final TeacherPopup teacherPopup;
 
     @Inject
-    public TeacherCarouselTest_Ed(Page page, TestConfig config) {
+    public TeacherCarouselTest(Page page, TestConfig config) {
         this.page = page;
         this.config = config;
         this.lessonPage = new LessonPage(page, config);
@@ -119,7 +119,7 @@ public class TeacherCarouselTest_Ed {
 
     public static void main(String[] args) {
         // Инициализация DI и запуск теста
-        TeacherCarouselTest_Ed test = DependencyInitializer.getInstance(TeacherCarouselTest_Ed.class);
+        TeacherCarouselTest test = DependencyInitializer.getInstance(TeacherCarouselTest.class);
 
         // Добавляем shutdown hook для корректного закрытия ресурсов
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
