@@ -14,9 +14,29 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <playwright.version>1.42.0</playwright.version>
         <slf4j.version>2.0.9</slf4j.version>
+        <junit.version>5.10.0</junit.version>
     </properties>
 
     <dependencies>
+        <!-- JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
         <!-- Playwright -->
         <dependency>
             <groupId>com.microsoft.playwright</groupId>
@@ -76,23 +96,23 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M5</version>
-                <configuration>
-                    <properties>
-                        <property>
-                            <name>usedefaultlisteners</name>
-                            <value>false</value>
-                        </property>
-                    </properties>
-                    <!-- Для параллельного запуска -->
-                    <parallel>methods</parallel>
-                    <threadCount>4</threadCount>
-                    <!-- Указываем класс-раннер -->
-                    <mainClass>runners.TestRunner</mainClass>
-                    <includes>
-                        <include>**/TestRunner.java</include>
-                    </includes>
-                </configuration>
+                <version>3.1.0</version>
+<!--                <configuration>-->
+<!--                    <properties>-->
+<!--                        <property>-->
+<!--                            <name>usedefaultlisteners</name>-->
+<!--                            <value>false</value>-->
+<!--                        </property>-->
+<!--                    </properties>-->
+<!--                    &lt;!&ndash; Для параллельного запуска &ndash;&gt;-->
+<!--                    <parallel>methods</parallel>-->
+<!--                    <threadCount>4</threadCount>-->
+<!--                    &lt;!&ndash; Указываем класс-раннер &ndash;&gt;-->
+<!--                    <mainClass>runners.TestRunner</mainClass>-->
+<!--                    <includes>-->
+<!--                        <include>**/TestRunner.java</include>-->
+<!--                    </includes>-->
+<!--                </configuration>-->
             </plugin>
         </plugins>
     </build>
