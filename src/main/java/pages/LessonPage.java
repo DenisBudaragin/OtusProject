@@ -11,6 +11,7 @@ public class LessonPage extends BasePage {
     private final String teachersSection = "//*[text()='Преподаватели']";
     private final String teacherCard = "//div[@class='sc-jotj87-1 fjUCpx']";
     private final String teacherName = "//p[@class='sc-1x9oq14-0 sc-1s527z5-1 gGtEnS iiYkXk']";
+    private final String teacherCaruselNextButton = "//button[@class='sc-1bkbgbz-2 sc-1bkbgbz-3 dQlnjC iPzpLW']";
 
     public LessonPage(Page page, TestConfig config) {
         super(page, config);
@@ -35,12 +36,11 @@ public class LessonPage extends BasePage {
     public void scrollTeachersCarousel() {
         Logger logger = LoggerFactory.getLogger(getClass());
 
-        String buttonLocator = "//button[@class='sc-1bkbgbz-2 sc-1bkbgbz-3 dQlnjC iPzpLW']";
         logger.info("Начинаем клик по кнопке карусели");
-        logger.info("Локатор: {}", buttonLocator);
+        logger.info("Локатор: {}", teacherCaruselNextButton);
 
         try {
-            Locator carouselButton = page.locator(buttonLocator);
+            Locator carouselButton = page.locator(teacherCaruselNextButton);
 
             logger.info("Проверяем наличие кнопки...");
             int buttonCount = carouselButton.count();
@@ -87,12 +87,11 @@ public class LessonPage extends BasePage {
                 }
             } else {
                 logger.error("Кнопка не найдена по указанному локатору");
-                throw new RuntimeException("Элемент не найден: " + buttonLocator);
+                throw new RuntimeException("Элемент не найден: " + teacherCaruselNextButton);
             }
 
         } catch (Exception e) {
             logger.error("❌ Ошибка при клике по кнопке:", e);
-//            toString("click_error");
             throw e;
         }
     }
