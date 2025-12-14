@@ -1,10 +1,11 @@
-package tests;
+package extension;
 
 import com.google.inject.Injector;
+import com.microsoft.playwright.Page;
 import di.DependencyInitializer;
 import org.junit.jupiter.api.extension.*;
 
-public class PlaywrightExtension implements BeforeAllCallback, AfterAllCallback, ParameterResolver{
+public class PlayWrightExtensions implements BeforeAllCallback, AfterAllCallback, ParameterResolver{
     private Injector injector;
 
     @Override
@@ -22,7 +23,7 @@ public class PlaywrightExtension implements BeforeAllCallback, AfterAllCallback,
                                      ExtensionContext extensionContext) throws ParameterResolutionException {
         Class<?> paramType = parameterContext.getParameter().getType();
         return paramType.isAnnotationPresent(com.google.inject.Inject.class) ||
-                paramType == com.microsoft.playwright.Page.class ||
+                paramType == Page.class ||
                 paramType == config.TestConfig.class ||
                 paramType == service.TeacherCarouselService.class;
     }

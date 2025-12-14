@@ -7,9 +7,10 @@ import di.DependencyInitializer;
 import service.TeacherCarouselService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import extension.PlayWrightExtensions;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ExtendWith(PlaywrightExtension.class)
+@ExtendWith(PlayWrightExtensions.class)
 public class TeacherCarouselTest {
     private TeacherCarouselService teacherCarouselService;
     private Page page;
