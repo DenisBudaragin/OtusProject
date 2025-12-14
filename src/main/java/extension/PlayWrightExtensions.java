@@ -5,17 +5,33 @@ import com.microsoft.playwright.Page;
 import di.DependencyInitializer;
 import org.junit.jupiter.api.extension.*;
 
-public class PlayWrightExtensions implements BeforeAllCallback, AfterAllCallback, ParameterResolver{
+public class PlayWrightExtensions implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback, ParameterResolver{
     private Injector injector;
+    private Page page;
+    private static Page staticPage;
+
+    @Override
+    public void afterEach(ExtensionContext extensionContext) throws Exception {
+
+    }
+
+    @Override
+    public void beforeEach(ExtensionContext extensionContext) throws Exception {
+
+    }
 
     @Override
     public void beforeAll(ExtensionContext context) throws Exception {
-        // Можно инициализировать общие ресурсы здесь если нужно
+        // Инициализируем статические зависимости
+        staticPage = DependencyInitializer.getInstance(Page.class);
     }
 
     @Override
     public void afterAll(ExtensionContext context) throws Exception {
-        // Очистка ресурсов после всех тестов
+        // Закрываем браузер после всех тестов в классе
+        if (staticPage != null && staticPage.context() != null && staticPage.context().browser() != null) {
+            staticPage.context().browser().close();
+        }
     }
 
     @Override
@@ -32,6 +48,12 @@ public class PlayWrightExtensions implements BeforeAllCallback, AfterAllCallback
     public Object resolveParameter(ParameterContext parameterContext,
                                    ExtensionContext extensionContext) throws ParameterResolutionException {
         Class<?> paramType = parameterContext.getParameter().getType();
+
+        // Для Page возвращаем статический экземпляр
+        if (paramType == Page.class) {
+            return staticPage;
+        }
+
         return DependencyInitializer.getInstance(paramType);
     }
 }

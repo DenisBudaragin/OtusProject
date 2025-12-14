@@ -1,9 +1,5 @@
 package tests;
 
-import com.google.inject.Inject;
-import com.microsoft.playwright.Page;
-import config.TestConfig;
-import di.DependencyInitializer;
 import service.TeacherCarouselService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,19 +8,9 @@ import extension.PlayWrightExtensions;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(PlayWrightExtensions.class)
 public class TeacherCarouselTest {
-    private TeacherCarouselService teacherCarouselService;
-    private Page page;
-
-    @BeforeAll
-    public void setUp() {
-        // Получаем зависимости напрямую через DependencyInitializer
-        teacherCarouselService = DependencyInitializer.getInstance(TeacherCarouselService.class);
-        page = DependencyInitializer.getInstance(Page.class);
-    }
-
     @Test
     @DisplayName("Проверка карусели преподавателей")
-    public void testTeacherCarousel() {
+    public void testTeacherCarousel(TeacherCarouselService teacherCarouselService) {
         // Шаг 1: Открыть страницу урока
         teacherCarouselService.openLessonPage("/lessons/clickhouse/");
 
@@ -51,12 +37,4 @@ public class TeacherCarouselTest {
         teacherCarouselService.navigateToPreviousTeacherInPopup();
         teacherCarouselService.verifyPreviousTeacherIsOriginal();
     }
-
-    @AfterAll
-    public void tearDown() {
-        if (page != null && page.context() != null && page.context().browser() != null) {
-            page.context().browser().close();
-        }
-    }
-
 }

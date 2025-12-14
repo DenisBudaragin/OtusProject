@@ -10,7 +10,6 @@ public class LessonPage extends BasePage {
     // Локаторы
     private final String teachersSection = "//*[text()='Преподаватели']";
     private final String teacherCard = "//div[@class='sc-jotj87-1 fjUCpx']";
-    private final String caruselButton = "//*[contains(@class, 'sc-1x9oq14-0')]";
     private final String teacherName = "//p[@class='sc-1x9oq14-0 sc-1s527z5-1 gGtEnS iiYkXk']";
 
     public LessonPage(Page page, TestConfig config) {
