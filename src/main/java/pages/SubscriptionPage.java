@@ -85,12 +85,12 @@ public class SubscriptionPage extends BasePage {
 
     public void fillFieldEmailByXpath() {
         page.locator(email)
-                .fill("budaragindenis@mail.ru",
+                .fill("",
                         new Locator.FillOptions().setForce(true));
     }
     public void fillFieldPassByXpath() {
         page.locator(pass)
-                .fill("JFX478slkQ!",
+                .fill("",
                         new Locator.FillOptions().setForce(true));
     }
 
