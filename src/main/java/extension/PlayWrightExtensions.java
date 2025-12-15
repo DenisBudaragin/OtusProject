@@ -96,6 +96,10 @@ public class PlayWrightExtensions implements BeforeAllCallback, AfterAllCallback
 
     @Override
     public void beforeAll(ExtensionContext context) throws Exception {
+        // Всегда создаем новый браузер для каждого тестового класса
+        System.out.println("Инициализация Playwright для тестового класса: " +
+                context.getTestClass().map(Class::getSimpleName).orElse("Unknown"));
+
         // Создаем директорию для трассировок
         try {
             Files.createDirectories(Paths.get(TRACES_DIR));
@@ -103,20 +107,13 @@ public class PlayWrightExtensions implements BeforeAllCallback, AfterAllCallback
             System.err.println("Failed to create traces directory: " + e.getMessage());
         }
 
-        // Инициализируем статические зависимости
+        // Инициализируем зависимости (создаем новый экземпляр)
         staticPage = DependencyInitializer.getInstance(Page.class);
+//        isBrowserClosed = false;
 
-        // Настраиваем трассировку на уровне контекста
-        if (staticPage != null && staticPage.context() != null) {
-            try {
-                // Можно добавить начальную конфигурацию трассировки
-                System.out.println("Playwright tracing is enabled");
-                System.out.println("Traces will be saved to: " +
-                        Paths.get(TRACES_DIR).toAbsolutePath());
-            } catch (Exception e) {
-                System.err.println("Failed to configure tracing: " + e.getMessage());
-            }
-        }
+        System.out.println("Playwright initialized for class. Tracing is enabled");
+        System.out.println("Traces will be saved to: " +
+                Paths.get(TRACES_DIR).toAbsolutePath());
     }
 
     @Override
@@ -124,7 +121,7 @@ public class PlayWrightExtensions implements BeforeAllCallback, AfterAllCallback
         // Закрываем браузер после всех тестов в классе
         if (staticPage != null && staticPage.context() != null && staticPage.context().browser() != null) {
             try {
-                // Сохраняем общую трассировку для всего тестового класса (опционально)
+                // Сохраняем общую трассировку для всего тестового класса
                 String timestamp = DATE_FORMAT.format(new Date());
                 String className = context.getTestClass()
                         .map(Class::getSimpleName)
@@ -133,21 +130,20 @@ public class PlayWrightExtensions implements BeforeAllCallback, AfterAllCallback
                         .replaceAll("_+", "_");
 
                 Path tracePath = Paths.get(TRACES_DIR,
-                        String.format("%s_full_%s.zip", className, timestamp));
+                        String.format("%s_class_trace_%s.zip", className, timestamp));
 
-                // Останавливаем любую активную трассировку
-                if (staticPage.context().tracing() != null) {
-                    staticPage.context().tracing().stop(new Tracing.StopOptions()
-                            .setPath(tracePath));
-                }
+                staticPage.context().tracing().stop(new Tracing.StopOptions()
+                        .setPath(tracePath));
 
                 staticPage.context().browser().close();
-                System.out.println("Browser closed. Full class trace saved to: " + tracePath.toAbsolutePath());
+//                isBrowserClosed = true;
+                staticPage = null; // Сбрасываем статическую ссылку
+
+                System.out.println("Browser closed for class: " + className + ". Trace saved to: " + tracePath.toAbsolutePath());
             } catch (Exception e) {
                 System.err.println("Error during cleanup: " + e.getMessage());
-                if (staticPage.context().browser() != null) {
-                    staticPage.context().browser().close();
-                }
+//                isBrowserClosed = true;
+                staticPage = null;
             }
         }
 
