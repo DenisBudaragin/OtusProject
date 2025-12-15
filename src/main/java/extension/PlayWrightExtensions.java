@@ -163,7 +163,8 @@ public class PlayWrightExtensions implements BeforeAllCallback, AfterAllCallback
                 paramType == Page.class ||
                 paramType == config.TestConfig.class ||
                 paramType == service.TeacherCarouselService.class ||
-                paramType == service.TimeDurationCoursesService.class;
+                paramType == service.TimeDurationCoursesService.class ||
+                paramType == service.SubscriptionService.class;
     }
 
     @Override

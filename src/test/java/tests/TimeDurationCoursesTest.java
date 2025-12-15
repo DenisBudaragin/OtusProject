@@ -12,16 +12,11 @@ public class TimeDurationCoursesTest {
     @DisplayName("Проверка продолжительности курса")
     public void testTimeDurationCourses(TimeDurationCoursesService timeDurationCoursesService) {
         timeDurationCoursesService.openCatalogPage("/catalog/courses");
-
         timeDurationCoursesService.verifyDefaultFilterSettings();
-
         timeDurationCoursesService.scrollTo("Продолжительность");
-
         timeDurationCoursesService.applyDurationFilter(3, 10);
         timeDurationCoursesService.checkCourseDuration();
-
         timeDurationCoursesService.selectArchitectureDirection();
-
         timeDurationCoursesService.resetAllFilters();
     }
 }
