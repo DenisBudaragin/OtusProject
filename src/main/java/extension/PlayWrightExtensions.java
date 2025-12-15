@@ -60,6 +60,27 @@ public class PlayWrightExtensions implements BeforeAllCallback, AfterAllCallback
                 .replaceAll("[^a-zA-Z0-9.-]", "_")
                 .replaceAll("_+", "_"));
 
+        // Очищаем куки и localStorage перед каждым тестом
+        if (staticPage != null && staticPage.context() != null) {
+            try {
+                System.out.println("Очищаем куки");
+
+                // 1. Очищаем куки
+                staticPage.context().clearCookies();
+
+                System.out.println("Куки очищены");
+
+                // 4. Перезагружаем страницу чтобы очистить состояние приложения
+                staticPage.reload();
+
+                // 5. Ждем загрузки страницы
+                staticPage.waitForLoadState();
+
+            } catch (Exception e) {
+                System.err.println("Ошибка при чистке cookie/storage" + e.getMessage());
+            }
+        }
+
         // Начинаем трассировку перед каждым тестом
         if (staticPage != null && staticPage.context() != null) {
             try {
@@ -130,7 +151,6 @@ public class PlayWrightExtensions implements BeforeAllCallback, AfterAllCallback
             }
         }
 
-        // Очищаем ThreadLocal переменные
         testName.remove();
         className.remove();
     }
@@ -142,7 +162,8 @@ public class PlayWrightExtensions implements BeforeAllCallback, AfterAllCallback
         return paramType.isAnnotationPresent(com.google.inject.Inject.class) ||
                 paramType == Page.class ||
                 paramType == config.TestConfig.class ||
-                paramType == service.TeacherCarouselService.class;
+                paramType == service.TeacherCarouselService.class ||
+                paramType == service.TimeDurationCoursesService.class;
     }
 
     @Override
