@@ -15,21 +15,22 @@ public class UserDeleteTest {
 
     @Test
     public void deleteUserByName() {
+        String userName = RandomGenerator.generateFirstName();
         User user = new User();
-        user.setId(0);
-        user.setUsername(Config.userName);
-        user.setFirstName("TestUser_" + RandomGenerator.generateRandomString(7));
-        user.setLastName("TestUser_" + RandomGenerator.generateRandomString(7));
-        user.setEmail(RandomGenerator.generateRandomString(7) + "@gmail.com");
-        user.setPassword("123");
-        user.setPhone("321");
+        user.setId(RandomGenerator.generateUserId());
+        user.setUsername(userName);
+        user.setFirstName(RandomGenerator.generateFirstName());
+        user.setLastName(RandomGenerator.generateLastName());
+        user.setEmail(RandomGenerator.generateEmail());
+        user.setPassword(RandomGenerator.generatePassword(8, 12));
+        user.setPhone(RandomGenerator.generatePhoneNumber());
         user.setUserStatus(1);
 
         //Создаем пользователя
         UserApi.createUserSuccess(user);
 
         //Удаляем пользователя
-        UserApi.deleteUser(Config.userName);
+        UserApi.deleteUser(userName);
     }
 
     /* Негативный сценарий

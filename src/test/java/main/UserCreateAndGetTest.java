@@ -5,9 +5,11 @@ import helpers.RandomGenerator;
 import org.junit.jupiter.api.Test;
 import pojo.User;
 import services.UserApi;
+import com.github.javafaker.Faker;
 
 public class UserCreateAndGetTest {
-     /*
+    private static final Faker faker = new Faker();
+    /*
      * Автотест проверяет создание пользователя (позитивный сценарий)
      * отправляется запрос POST /v2/user
      * и отправляется запрос на получение созданного пользователя GET /v2/{user_name}
@@ -17,19 +19,19 @@ public class UserCreateAndGetTest {
 
     @Test
     public void createAndGetUser() {
-
+        String userName = RandomGenerator.generateFirstName();
         User user = new User();
-        user.setId(0);
-        user.setUsername(Config.userName);
-        user.setFirstName("TestUser_" + RandomGenerator.generateRandomString(7));
-        user.setLastName("TestUser_" + RandomGenerator.generateRandomString(7));
-        user.setEmail(RandomGenerator.generateRandomString(7) + "@gmail.com");
-        user.setPassword("123");
-        user.setPhone("321");
+        user.setId(RandomGenerator.generateUserId());
+        user.setUsername(userName);
+        user.setFirstName(RandomGenerator.generateFirstName());
+        user.setLastName(RandomGenerator.generateLastName());
+        user.setEmail(RandomGenerator.generateEmail());
+        user.setPassword(RandomGenerator.generatePassword(8, 12));
+        user.setPhone(RandomGenerator.generatePhoneNumber());
         user.setUserStatus(1);
 
         UserApi.createUserSuccess(user);
-        UserApi.getUser(Config.userName);
+        UserApi.getUser(userName);
     }
 
     /* Негативный сценарий
