@@ -1,6 +1,5 @@
 package services;
 
-import configs.Config;
 import io.restassured.http.ContentType;
 import pojo.User;
 import specifications.RequestSpec;
@@ -35,8 +34,8 @@ public class UserApi {
                 .log().all();
     }
 
-    public static void getUser(String userName){
-        given()
+    public static User getUser(String userName){
+        return given()
                 .spec(RequestSpec.baseRequestSpec())
                 .pathParam("username", userName)
                 .when()
@@ -45,7 +44,7 @@ public class UserApi {
                 .body(matchesJsonSchema(new File("src/main/java/schemas/user_response.json"))) // Валидация JSON схемы
                 .log().all()
                 .extract()
-                .response();
+                .as(User.class);
     }
 
     public static void deleteUser(String userName){

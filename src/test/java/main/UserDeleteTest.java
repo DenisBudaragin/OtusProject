@@ -1,10 +1,10 @@
 package main;
 
-import configs.Config;
 import helpers.RandomGenerator;
 import org.junit.jupiter.api.Test;
 import pojo.User;
 import services.UserApi;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UserDeleteTest {
     /*
@@ -28,6 +28,16 @@ public class UserDeleteTest {
 
         //Создаем пользователя
         UserApi.createUserSuccess(user);
+        // Получаем пользователя и проверяем его данные перед удалением
+        User responseUser = UserApi.getUser(userName);
+
+        assertEquals(user.getId(), responseUser.getId(), "ID пользователя не совпадает");
+        assertEquals(user.getUsername(), responseUser.getUsername(), "Username не совпадает");
+        assertEquals(user.getFirstName(), responseUser.getFirstName(), "FirstName не совпадает");
+        assertEquals(user.getLastName(), responseUser.getLastName(), "LastName не совпадает");
+        assertEquals(user.getEmail(), responseUser.getEmail(), "Email не совпадает");
+        assertEquals(user.getPhone(), responseUser.getPhone(), "Phone не совпадает");
+        assertEquals(user.getUserStatus(), responseUser.getUserStatus(), "UserStatus не совпадает");
 
         //Удаляем пользователя
         UserApi.deleteUser(userName);

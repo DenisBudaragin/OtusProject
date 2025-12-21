@@ -1,11 +1,11 @@
 package main;
 
-import configs.Config;
 import helpers.RandomGenerator;
 import org.junit.jupiter.api.Test;
 import pojo.User;
 import services.UserApi;
 import com.github.javafaker.Faker;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UserCreateAndGetTest {
     private static final Faker faker = new Faker();
@@ -31,7 +31,15 @@ public class UserCreateAndGetTest {
         user.setUserStatus(1);
 
         UserApi.createUserSuccess(user);
-        UserApi.getUser(userName);
+        User responseUser = UserApi.getUser(userName);
+
+        assertEquals(user.getId(), responseUser.getId(), "ID пользователя не совпадает");
+        assertEquals(user.getUsername(), responseUser.getUsername(), "Username не совпадает");
+        assertEquals(user.getFirstName(), responseUser.getFirstName(), "FirstName не совпадает");
+        assertEquals(user.getLastName(), responseUser.getLastName(), "LastName не совпадает");
+        assertEquals(user.getEmail(), responseUser.getEmail(), "Email не совпадает");
+        assertEquals(user.getPhone(), responseUser.getPhone(), "Phone не совпадает");
+        assertEquals(user.getUserStatus(), responseUser.getUserStatus(), "UserStatus не совпадает");
     }
 
     /* Негативный сценарий
