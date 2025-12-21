@@ -7,7 +7,7 @@ import io.restassured.http.ContentType;
 public class RequestSpec {
     public static RequestSpecification baseRequestSpec() {
         return new RequestSpecBuilder()
-                .setBaseUri(Config.BASE_URI)
+                .setBaseUri(Config.baseUri)
                 .setContentType(ContentType.JSON)
                 .addHeader("Accept", "application/json")
                 .build();
