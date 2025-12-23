@@ -1,5 +1,9 @@
 package main;
 
+import fixtures.CleanupUsers;
+import fixtures.UserCleanupExtension;
+import fixtures.UserFixtures;
+import org.junit.jupiter.api.extension.ExtendWith;
 import helpers.RandomGenerator;
 import org.junit.jupiter.api.Test;
 import pojo.User;
@@ -7,6 +11,8 @@ import services.UserApi;
 import com.github.javafaker.Faker;
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(UserCleanupExtension.class)
+@CleanupUsers(enabled = true)
 public class UserCreateAndGetTest {
     private static final Faker faker = new Faker();
     /*
@@ -31,6 +37,10 @@ public class UserCreateAndGetTest {
         user.setUserStatus(1);
 
         UserApi.createUserSuccess(user);
+
+        // Регистрируем пользователя для автоматического удаления
+        UserFixtures.registerUserForCleanup(userName);
+
         User responseUser = UserApi.getUser(userName);
 
         assertEquals(user.getId(), responseUser.getId(), "ID пользователя не совпадает");
