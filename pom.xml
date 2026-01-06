@@ -16,28 +16,64 @@
         <guice.version>7.0.0</guice.version>
         <junitjupiter.version>5.14.0</junitjupiter.version>
         <assertj.version>3.27.6</assertj.version>
+        <lombok.version>1.18.42</lombok.version>
+        <javafaker.version>1.0.2</javafaker.version>
+        <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
     </properties>
 
     <dependencies>
+        <!-- RestAssured -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>${restassured.version}</version>
         </dependency>
+        <!-- JSON Schema Validator для RestAssured -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${restassured.version}</version>
+        </dependency>
+
+        <!-- JavaFaker для генерации тестовых данных -->
+        <dependency>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+            <version>${javafaker.version}</version>
+        </dependency>
+
+        <!-- Google Guice для Dependency Injection -->
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
             <version>${guice.version}</version>
         </dependency>
+
+        <!-- JUnit Jupiter -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>${junitjupiter.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junitjupiter.version}</version>
+        </dependency>
+
+        <!-- AssertJ для assertions -->
+        <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${assertj.version}</version>
+        </dependency>
+
+        <!-- Lombok (только одна запись!) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -46,9 +82,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
@@ -56,13 +100,13 @@
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>4.9.3.2</version>
                 <configuration>
-                    <effort>Max</effort> <!-- Уровень детализации -->
-                    <threshold>Low</threshold> <!-- Минимальный уровень ошибки -->
-                    <failOnError>true</failOnError> <!-- Остановка сборки при ошибках -->
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <failOnError>true</failOnError>
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>verify</phase> <!-- Запуск при сборке -->
+                        <phase>verify</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
@@ -76,9 +120,6 @@
                 <configuration>
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <configLocation>${project.build.sourceDirectory}/../resources/checkstyle.xml</configLocation>
-<!--                    <configLocation>google_checks.xml</configLocation> &lt;!&ndash; или путь к своему файлу &ndash;&gt;-->
-<!--&lt;!&ndash;                    <encoding>UTF-8</encoding>&ndash;&gt;-->
-<!--                    <failOnViolation>true</failOnViolation>-->
                 </configuration>
                 <executions>
                     <execution>
@@ -89,7 +130,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Запуск unit-тестов -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

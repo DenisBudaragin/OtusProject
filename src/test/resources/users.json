@@ -1,0 +1,14 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {"type": "integer"},
+      "name": {"type": "string"},
+      "age": {"type":  "integer"},
+      "course": {"type": "string"},
+      "email": {"type":  "string"}
+    },
+    "required" : ["name", "age"]
+  }
+}
