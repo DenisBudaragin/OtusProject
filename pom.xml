@@ -19,6 +19,7 @@
         <lombok.version>1.18.42</lombok.version>
         <javafaker.version>1.0.2</javafaker.version>
         <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
+        <wiremock-standalone.version>3.13.1</wiremock-standalone.version>
     </properties>
 
     <dependencies>
@@ -74,6 +75,11 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock-standalone.version}</version>
         </dependency>
     </dependencies>
 
