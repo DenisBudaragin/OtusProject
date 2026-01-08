@@ -1,17 +1,7 @@
 - name: Обновление стабов WireMock
   hosts: all
-  vars:
-    wiremock_host: "147.45.100.156"
-    wiremock_port: "8080"
-    container_name: "wiremock-new"
-    wiremock_version: "3.13.2"
-    # Список всех шаблонов для загрузки
-    template_files:
-      - "templates/course_get_all.json.j2"
-      - "templates/user_get_all.json.j2"
-      - "templates/user_get_by_id.json.j2"
-      - "templates/user_get_estimate.json.j2"
-      - "templates/user_soap.json.j2"
+  vars_files:
+    - "test_infra.yaml"
 
   tasks:
     - name: Удаляем старую директорию с маппингами
