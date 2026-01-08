@@ -1,0 +1,140 @@
+- name: Обновление стабов WireMock
+  hosts: all
+  vars:
+    wiremock_host: "147.45.100.156"
+    wiremock_port: "8080"
+    container_name: "wiremock-new"
+    wiremock_version: "3.13.2"
+    # Список всех шаблонов для загрузки
+    template_files:
+      - "templates/course_get_all.json.j2"
+      - "templates/user_get_all.json.j2"
+      - "templates/user_get_by_id.json.j2"
+      - "templates/user_get_estimate.json.j2"
+      - "templates/user_soap.json.j2"
+
+  tasks:
+    - name: Удаляем старую директорию с маппингами
+      file:
+        path: "/opt/wiremock/mappings"
+        state: absent  # <-- полностью удаляем директорию
+      ignore_errors: yes
+
+    - name: Генерируем маппинги из всех шаблонов
+      template:
+        src: "{{ item }}"
+        dest: "/tmp/{{ item | basename | regex_replace('\\.j2$', '') }}"
+      loop: "{{ template_files }}"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Копируем маппинги на удаленный хост
+      copy:
+        src: "/tmp/{{ item | basename | regex_replace('\\.j2$', '') }}"
+        dest: "/opt/{{ item | basename | regex_replace('\\.j2$', '') }}"
+      loop: "{{ template_files }}"
+
+    - name: Останавливаем контейнеры на порту 8080
+      shell: |
+        docker stop $(docker ps -q --filter "publish=8080") 2>/dev/null || true
+        docker rm $(docker ps -aq --filter "publish=8080") 2>/dev/null || true
+      ignore_errors: yes
+
+    - name: Убиваем процессы на порту 8080
+      shell: |
+        sudo fuser -k 8080/tcp 2>/dev/null || true
+      ignore_errors: yes
+      become: yes
+
+    - name: Останавливаем и удаляем старый контейнер
+      shell: |
+        docker stop {{ container_name }} 2>/dev/null || true
+        docker rm {{ container_name }} 2>/dev/null || true
+      ignore_errors: yes
+
+    - name: Создаем директорию для маппингов
+      file:
+        path: "/opt/wiremock/mappings"
+        state: directory
+        mode: '0755'
+
+    - name: Копируем все маппинги в рабочую директорию WireMock
+      copy:
+        src: "/opt/{{ item | basename | regex_replace('\\.j2$', '') }}"
+        dest: "/opt/wiremock/mappings/{{ item | basename | regex_replace('\\.j2$', '') }}"
+        remote_src: yes
+      loop: "{{ template_files }}"
+
+    - name: Запускаем новый контейнер WireMock
+      shell: |
+        docker run -d \
+          --name {{ container_name }} \
+          -p {{ wiremock_port }}:8080 \
+          -v /opt/wiremock/mappings:/home/wiremock/mappings \
+          wiremock/wiremock:{{ wiremock_version }} \
+          --verbose
+      args:
+        executable: /bin/bash
+
+    - name: Ждем запуска WireMock
+      wait_for:
+        host: "{{ wiremock_host }}"
+        port: "{{ wiremock_port }}"
+        delay: 5
+        timeout: 30
+
+    - name: Даем WireMock время на загрузку маппингов
+      pause:
+        seconds: 3
+
+    - name: Проверяем маппинги через API
+      uri:
+        url: "http://{{ wiremock_host }}:{{ wiremock_port }}/__admin/mappings"
+        method: GET
+        return_content: yes
+        timeout: 10
+      register: mappings_check
+      ignore_errors: yes
+
+    - name: Выводим маппинги для отладки
+      debug:
+        msg: "Маппинги WireMock: {{ mappings_check.json|default('Не удалось получить') }}"
+
+    - name: Проверяем работу всех endpoints
+      uri:
+        url: "http://{{ wiremock_host }}:{{ wiremock_port }}{{ item.endpoint }}"
+        method: GET
+        return_content: yes
+        timeout: 10
+      loop:
+        - { endpoint: "/user/get/all", name: "user_get_all" }
+        - { endpoint: "/course/get/all", name: "course_get_all" }
+        - { endpoint: "/user/get/5", name: "user_get_by_id" }
+        - { endpoint: "/get/estimate", name: "user_get_estimate" }
+#        - { endpoint: "/user/soap", name: "user_soap" }
+      register: api_responses
+
+    - name: Выводим результаты проверки endpoints
+      debug:
+        msg: |
+          Endpoint: {{ item.item.endpoint }} ({{ item.item.name }})
+          Статус: {{ item.status }}
+          Ответ: {{ item.json | default(item.content | to_json) if item.content else 'Пустой ответ' }}
+      loop: "{{ api_responses.results }}"
+
+    - name: Очищаем временные файлы
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/tmp/course_get_all.json"
+        - "/tmp/user_get_all.json"
+        - "/tmp/user_get_by_id.json"
+        - "/tmp/user_get_estimate.json"
+        - "/tmp/user_soap.json"
+        - "/opt/course_get_all.json"
+        - "/opt/user_get_all.json"
+        - "/opt/user_get_by_id.json"
+        - "/opt/user_get_estimate.json"
+        - "/opt/user_soap.json"
+      delegate_to: localhost

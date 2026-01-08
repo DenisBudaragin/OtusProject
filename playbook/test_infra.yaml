@@ -1,9 +1,1 @@
-- hosts: my_host
-  remote_user: "{{ username }}"
-  become: yes
-
-  vars:
-    username: "d_budaragin"
-
-  roles:
-    - wiremock
+---

@@ -1,7 +1,8 @@
 {
+  "priority": 1,
   "request": {
     "method": "GET",
-    "url": "/user/get/all"
+    "urlPattern": "/user/get/5"
   },
   "response": {
     "status": 200,
@@ -9,10 +10,13 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "name": "Hello :)",
+      "id": 5,
+      "name": "Super name",
+      "surname": "Super surname",
       "course": "QA",
       "email": "test@test.test",
-      "age": 23
+      "age": 23,
+      "number": 789123456
     }
   }
 }

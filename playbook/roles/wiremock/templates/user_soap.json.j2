@@ -1,13 +1,19 @@
 {
-    "request": {
-        "method": "POST",
-        "url": "/soap/user"
-    },
-    "response": {
-        "status": 200,
-        "headers": {
-            "Content-type": "text/xml;charset=UTF-8"
-        },
-        "body": "<xml><soapenv:Envelop></soapenv:Envelop></xml>"
+  "request": {
+    "method": "POST",
+    "url": "/soap/user",
+    "headers": {
+      "Content-Type": {
+        "contains": "xml"
+      }
     }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "text/xml; charset=utf-8",
+      "Server": "WireMock"
+    },
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetUserResponse xmlns=\"http://example.com/soap\">\n      <User>\n        <Id>12345</Id>\n        <Name>Иван Иванов</Name>\n        <Email>ivan@example.com</Email>\n        <Roles>\n          <Role>Admin</Role>\n          <Role>User</Role>\n        </Roles>\n        <Active>true</Active>\n        <CreatedAt>2024-01-15T10:30:00</CreatedAt>\n      </User>\n    </GetUserResponse>\n  </soap:Body>\n</soap:Envelope>"
+  }
 }
