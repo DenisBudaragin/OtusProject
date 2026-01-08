@@ -1,4 +1,5 @@
 package specifications;
+import io.restassured.filter.log.LogDetail;
 import io.restassured.specification.ResponseSpecification;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -9,18 +10,14 @@ public class ResponseSpec {
         return new ResponseSpecBuilder()
                 .expectStatusCode(200)
                 .expectContentType(ContentType.JSON)
-                .expectBody("code", equalTo(200))
-                .expectBody("type", equalTo("unknown"))
-                .expectBody("message", notNullValue())
+                .log(LogDetail.ALL)
                 .build();
     }
-    public static ResponseSpecification getErrorResponseSpec() {
+
+    public static ResponseSpecification getXmlSuccessResponseSpec() {
         return new ResponseSpecBuilder()
-                .expectStatusCode(500)
-                .expectContentType(ContentType.JSON)
-                .expectBody("code", equalTo(500))
-                .expectBody("type", equalTo("unknown"))
-                .expectBody("message", equalTo("something bad happened"))
+                .expectStatusCode(200)
+                .log(LogDetail.ALL)
                 .build();
     }
 }

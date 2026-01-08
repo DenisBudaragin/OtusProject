@@ -1,15 +1,26 @@
 package specifications;
 import configs.Config;
+import io.restassured.filter.log.LogDetail;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 
 public class RequestSpec {
-    public static RequestSpecification baseRequestSpec() {
+
+
+    public static RequestSpecification getRequestSpec() {
         return new RequestSpecBuilder()
-                .setBaseUri(Config.baseUri)
+                .setBaseUri(Config.BASE_URL)
                 .setContentType(ContentType.JSON)
-                .addHeader("Accept", "application/json")
+                .log(LogDetail.ALL)
+                .build();
+    }
+
+    public static RequestSpecification getXmlRequestSpec() {
+        return new RequestSpecBuilder()
+                .setBaseUri(Config.BASE_URL)
+                .setContentType(ContentType.XML)
+                .log(LogDetail.ALL)
                 .build();
     }
 }
