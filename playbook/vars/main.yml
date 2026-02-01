@@ -1,0 +1,5 @@
+selenoid_host: "147.45.100.156"
+selenoid_port: 4444
+selenoid_ui_port: 8888
+selenoid_version: "1.10.14"
+selenoid_ui_version: "1.10.13"
