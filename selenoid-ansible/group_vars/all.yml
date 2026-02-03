@@ -1,0 +1,34 @@
+---
+# Docker Hub credentials
+docker_hub_username: "{{ lookup('env', 'DOCKER_HUB_USERNAME') | default('denisdocker717', true) }}"
+docker_hub_password: "{{ lookup('env', 'DOCKER_HUB_PASSWORD') | default('JFX478slkQ', true) }}"
+
+# Selenoid Configuration (ПРОВЕРЕННЫЕ ВЕРСИИ)
+selenoid_version: "1.11.3"
+selenoid_ui_version: "1.10.10"
+video_recorder_version: "latest-release"
+
+# Browser Versions
+chrome_version: "120.0"
+firefox_version: "121.0"
+opera_version: "106.0"
+
+# Image Tags (новый формат)
+chrome_image: "selenoid/vnc:chrome_{{ chrome_version }}"
+firefox_image: "selenoid/vnc:firefox_{{ firefox_version }}"
+opera_image: "selenoid/vnc:opera_{{ opera_version }}"
+
+# Ports
+selenoid_port: 4444
+selenoid_ui_port: 8080
+
+# Directories
+selenoid_base_dir: "/opt/selenoid"
+selenoid_config_dir: "{{ selenoid_base_dir }}/config"
+selenoid_video_dir: "{{ selenoid_base_dir }}/video"
+selenoid_logs_dir: "{{ selenoid_base_dir }}/logs"
+selenoid_download_dir: "{{ selenoid_base_dir }}/download"
+
+# Docker settings
+docker_network_name: "selenoid_network"
+docker_compose_file: "{{ selenoid_base_dir }}/docker-compose.yml"  # ← ЭТА СТРОКА БЫЛА ПРОПУЩЕНА!

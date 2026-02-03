@@ -1,12 +1,19 @@
 package helpers;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import driver.ChromeDriver;
+//import driver.ChromeDriver;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import driver.WebDriverModule; // Замена ChromeDriver
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.openqa.selenium.WebDriver;
 
 import java.util.List;
 
@@ -16,7 +23,7 @@ public class BaseTest {
 
     @BeforeAll
     public static void setup() {
-        injector = Guice.createInjector(new ChromeDriver());
+        injector = Guice.createInjector(new WebDriverModule());
         driver = injector.getInstance(WebDriver.class);
     }
 

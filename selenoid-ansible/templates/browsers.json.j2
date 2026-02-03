@@ -1,0 +1,44 @@
+{
+  "chrome": {
+    "default": "{{ chrome_version }}",
+    "versions": {
+      "{{ chrome_version }}": {
+        "image": "{{ chrome_image }}",
+        "port": "4444",
+        "path": "/",
+        "tmpfs": {"/tmp": "size=512m"},
+        "env": ["TZ=Europe/Moscow"],
+        "labels": {"selenoid": "true"},
+        "screenResolution": "1920x1080x24"
+      }
+    }
+  },
+  "firefox": {
+    "default": "{{ firefox_version }}",
+    "versions": {
+      "{{ firefox_version }}": {
+        "image": "{{ firefox_image }}",
+        "port": "4444",
+        "path": "/wd/hub",
+        "tmpfs": {"/tmp": "size=512m"},
+        "env": ["TZ=Europe/Moscow"],
+        "labels": {"selenoid": "true"},
+        "screenResolution": "1920x1080x24"
+      }
+    }
+  },
+  "opera": {
+    "default": "{{ opera_version }}",
+    "versions": {
+      "{{ opera_version }}": {
+        "image": "{{ opera_image }}",
+        "port": "4444",
+        "path": "/",
+        "tmpfs": {"/tmp": "size=512m"},
+        "env": ["TZ=Europe/Moscow"],
+        "labels": {"selenoid": "true"},
+        "screenResolution": "1920x1080x24"
+      }
+    }
+  }
+}

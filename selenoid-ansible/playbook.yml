@@ -1,0 +1,134 @@
+---
+- name: Deploy Selenoid with VNC and Selenoid UI
+  hosts: selenoid
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Check Docker installation
+      command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Display Docker version
+      debug:
+        msg: "Docker version: {{ docker_version.stdout }}"
+
+    - name: Ensure Docker Compose plugin is installed
+      apt:
+        name: docker-compose-plugin
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Create Selenoid directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ selenoid_base_dir }}"
+        - "{{ selenoid_config_dir }}"
+        - "{{ selenoid_video_dir }}"
+        - "{{ selenoid_logs_dir }}"
+        - "{{ selenoid_download_dir }}"
+
+    - name: Create docker-compose.yml from template
+      template:
+        src: templates/docker-compose.yml.j2
+        dest: "{{ docker_compose_file }}"
+        mode: "0644"
+
+    - name: Create browsers.json from template
+      template:
+        src: templates/browsers.json.j2
+        dest: "{{ selenoid_config_dir }}/browsers.json"
+        mode: "0644"
+
+    - name: Stop existing Selenoid containers (if any)
+      command: docker compose down
+      args:
+        chdir: "{{ selenoid_base_dir }}"
+      ignore_errors: yes
+
+    - name: Pull images explicitly
+      command: docker compose pull
+      args:
+        chdir: "{{ selenoid_base_dir }}"
+      register: pull_result
+      retries: 3
+      delay: 5
+      until: pull_result is succeeded
+
+    - name: Start Selenoid stack
+      command: docker compose up -d --remove-orphans
+      args:
+        chdir: "{{ selenoid_base_dir }}"
+      register: compose_result
+
+    - name: Wait for containers to start
+      pause:
+        seconds: 20
+
+    - name: Get Selenoid container logs
+      shell: "docker logs selenoid 2>&1 | tail -50"
+      register: selenoid_logs
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Display Selenoid logs
+      debug:
+        var: selenoid_logs.stdout_lines
+
+    - name: Check if Selenoid container is running (with proper escaping)
+      shell: "docker inspect -f '{{ '{{' }}.State.Running{{ '}}' }}' selenoid 2>/dev/null || echo 'false'"
+      register: selenoid_running
+      changed_when: false
+
+    - name: Fail if Selenoid container is not running
+      fail:
+        msg: "Selenoid container failed to start! Check logs above."
+      when: selenoid_running.stdout | trim != "true"
+
+    - name: Wait for Selenoid API to be ready
+      wait_for:
+        host: "localhost"
+        port: "{{ selenoid_port }}"
+        delay: 5
+        timeout: 120
+      ignore_errors: yes
+      register: api_check
+
+    - name: Get error patterns if API not ready
+      shell: "docker logs selenoid 2>&1 | grep -iE 'error|fail|exception|panic' | head -20"
+      register: error_logs
+      when: api_check.failed
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Display error patterns
+      debug:
+        var: error_logs.stdout_lines
+      when: api_check.failed and error_logs.stdout_lines is defined and error_logs.stdout_lines | length > 0
+
+    - name: Wait for Selenoid UI to be ready
+      wait_for:
+        host: "localhost"
+        port: "{{ selenoid_ui_port }}"
+        delay: 3
+        timeout: 60
+      ignore_errors: yes
+
+    - name: Verify containers status (with proper escaping)
+      shell: "docker ps --filter name=selenoid --format 'table {{ '{{' }}.Names{{ '}}' }}\\t{{ '{{' }}.Status{{ '}}' }}'"
+      register: containers_status
+      changed_when: false
+
+    - name: Display deployment summary
+      debug:
+        msg:
+          - "✅ Selenoid deployment completed!"
+          - "   Selenoid API: http://{{ inventory_hostname }}:{{ selenoid_port }}/wd/hub"
+          - "   Selenoid UI:  http://{{ inventory_hostname }}:{{ selenoid_ui_port }}"
+          - "   Containers:"
+          - "{{ containers_status.stdout | indent(4) }}"

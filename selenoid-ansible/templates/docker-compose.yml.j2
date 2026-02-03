@@ -1,0 +1,42 @@
+services:
+  selenoid:
+    image: aerokube/selenoid:{{ selenoid_version }}
+    container_name: selenoid
+    networks:
+      - selenoid_network
+    ports:
+      - "{{ selenoid_port }}:4444"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "{{ selenoid_config_dir }}/browsers.json:/etc/selenoid/browsers.json:ro"
+      - "{{ selenoid_video_dir }}:/opt/selenoid/video"
+      - "{{ selenoid_logs_dir }}:/opt/selenoid/logs"
+      - "{{ selenoid_download_dir }}:/opt/selenoid/download"
+    environment:
+      - OVERRIDE_VIDEO_OUTPUT_DIR=/opt/selenoid/video
+      - TZ=Europe/Moscow
+    # КОМАНДА БЕЗ -download-output-dir (НЕ ПОДДЕРЖИВАЕТСЯ В 1.11.3!)
+    command: "-conf /etc/selenoid/browsers.json -video-output-dir /opt/selenoid/video -log-output-dir /opt/selenoid/logs -container-network {{ docker_network_name }} -limit 10 -enable-file-upload"
+    restart: unless-stopped
+    shm_size: "2gb"
+    mem_limit: "2g"
+
+  selenoid-ui:
+    image: aerokube/selenoid-ui:{{ selenoid_ui_version }}
+    container_name: selenoid-ui
+    networks:
+      - selenoid_network
+    ports:
+      - "{{ selenoid_ui_port }}:8080"
+    depends_on:
+      - selenoid
+    environment:
+      - TZ=Europe/Moscow
+    command: "--selenoid-uri http://selenoid:4444"
+    restart: unless-stopped
+    mem_limit: "512m"
+
+networks:
+  selenoid_network:
+    name: {{ docker_network_name }}
+    driver: bridge
