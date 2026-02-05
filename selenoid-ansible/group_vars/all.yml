@@ -1,10 +1,10 @@
 ---
 # Docker Hub credentials
-docker_hub_username: "{{ lookup('env', 'DOCKER_HUB_USERNAME') | default('denisdocker717', true) }}"
-docker_hub_password: "{{ lookup('env', 'DOCKER_HUB_PASSWORD') | default('JFX478slkQ', true) }}"
+#docker_hub_username: "{{ lookup('env', 'DOCKER_HUB_USERNAME') | default('', true) }}"
+#docker_hub_password: "{{ lookup('env', 'DOCKER_HUB_PASSWORD') | default('', true) }}"
 
-# Selenoid Configuration (ПРОВЕРЕННЫЕ ВЕРСИИ)
-selenoid_version: "1.11.3"
+# Selenoid Configuration
+selenoid_version: "1.11.2"
 selenoid_ui_version: "1.10.10"
 video_recorder_version: "latest-release"
 
@@ -13,7 +13,7 @@ chrome_version: "120.0"
 firefox_version: "121.0"
 opera_version: "106.0"
 
-# Image Tags (новый формат)
+# Image Tags
 chrome_image: "selenoid/vnc:chrome_{{ chrome_version }}"
 firefox_image: "selenoid/vnc:firefox_{{ firefox_version }}"
 opera_image: "selenoid/vnc:opera_{{ opera_version }}"

@@ -45,6 +45,33 @@
         dest: "{{ selenoid_config_dir }}/browsers.json"
         mode: "0644"
 
+    - name: Pull Chrome browser image
+      command: docker pull "{{ chrome_image }}"
+      register: pull_chrome
+      retries: 3
+      delay: 5
+      until: pull_chrome is succeeded
+      changed_when: false
+      tags: pull_browsers
+
+#    - name: Pull Firefox browser image
+#      command: docker pull "{{ firefox_image }}"
+#      register: pull_firefox
+#      retries: 3
+#      delay: 5
+#      until: pull_firefox is succeeded
+#      changed_when: false
+#      tags: pull_browsers
+#
+#    - name: Pull Opera browser image
+#      command: docker pull "{{ opera_image }}"
+#      register: pull_opera
+#      retries: 3
+#      delay: 5
+#      until: pull_opera is succeeded
+#      changed_when: false
+#      tags: pull_browsers
+
     - name: Stop existing Selenoid containers (if any)
       command: docker compose down
       args:
