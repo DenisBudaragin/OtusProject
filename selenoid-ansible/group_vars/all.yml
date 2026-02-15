@@ -31,4 +31,4 @@ selenoid_download_dir: "{{ selenoid_base_dir }}/download"
 
 # Docker settings
 docker_network_name: "selenoid_network"
-docker_compose_file: "{{ selenoid_base_dir }}/docker-compose.yml"  # ← ЭТА СТРОКА БЫЛА ПРОПУЩЕНА!
+docker_compose_file: "{{ selenoid_base_dir }}/docker-compose.yml"
