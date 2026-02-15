@@ -1,5 +1,5 @@
 ---
-- name: Create Selenoid directories
+- name: Create Selenoid directories (first instance)
   file:
     path: "{{ item }}"
     state: directory
@@ -11,16 +11,67 @@
     - "{{ selenoid_logs_dir }}"
     - "{{ selenoid_download_dir }}"
 
+- name: Create directories for second Selenoid instance
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ selenoid2_base_dir }}"
+    - "{{ selenoid2_config_dir }}"
+    - "{{ selenoid2_video_dir }}"
+    - "{{ selenoid2_logs_dir }}"
+    - "{{ selenoid2_download_dir }}"
+
+- name: Create directory for GGR config
+  file:
+    path: "{{ ggr_config_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Create empty users.htpasswd file for GGR
+  copy:
+    content: ""
+    dest: "{{ ggr_config_dir }}/users.htpasswd"
+    force: no
+    mode: "0644"
+
+- name: Create quota directory for GGR
+  file:
+    path: "{{ ggr_config_dir }}/quota"
+    state: directory
+    mode: "0755"
+
+- name: Create default quota file (correct XML format)
+  copy:
+    content: "<browsers></browsers>"
+    dest: "{{ ggr_config_dir }}/quota/default.xml"
+    force: yes
+    mode: "0644"
+
 - name: Create docker-compose.yml from template
   template:
     src: docker-compose.yml.j2
     dest: "{{ docker_compose_file }}"
     mode: "0644"
 
-- name: Create browsers.json from template
+- name: Create browsers.json from template (shared for both instances)
   template:
     src: browsers.json.j2
     dest: "{{ selenoid_config_dir }}/browsers.json"
+    mode: "0644"
+
+- name: Copy browsers.json to second instance config directory
+  copy:
+    src: "{{ selenoid_config_dir }}/browsers.json"
+    dest: "{{ selenoid2_config_dir }}/browsers.json"
+    remote_src: yes
+    mode: "0644"
+
+- name: Create GGR config from template
+  template:
+    src: ggr.conf.j2
+    dest: "{{ ggr_config_dir }}/ggr.conf"
     mode: "0644"
 
 - name: Pull Chrome browser image
@@ -32,25 +83,31 @@
   changed_when: false
   tags: pull_browsers
 
-#- name: Pull Firefox browser image
-#  command: docker pull "{{ firefox_image }}"
-#  register: pull_firefox
-#  retries: 3
-#  delay: 5
-#  until: pull_firefox is succeeded
-#  changed_when: false
-#  tags: pull_browsers
-#
-#- name: Pull Opera browser image
-#  command: docker pull "{{ opera_image }}"
-#  register: pull_opera
-#  retries: 3
-#  delay: 5
-#  until: pull_opera is succeeded
-#  changed_when: false
-#  tags: pull_browsers
+# (Аналогичные задачи для Firefox и Opera можно раскомментировать)
 
-- name: Stop existing Selenoid containers (if any)
+- name: Remove any conflicting containers from previous manual runs
+  shell: docker rm -f ggr ggr-ui 2>/dev/null || true
+  changed_when: false
+
+- name: Pull GGR image (если ещё нет)
+  command: docker pull aerokube/ggr:{{ ggr_version }}
+  register: pull_ggr
+  retries: 3
+  delay: 5
+  until: pull_ggr is succeeded
+  changed_when: false
+  ignore_errors: yes   # образ уже есть на хосте – не критично
+
+- name: Pull GGR UI image
+  command: docker pull aerokube/ggr-ui:{{ ggr_ui_version }}
+  register: pull_ggr_ui
+  retries: 3
+  delay: 5
+  until: pull_ggr_ui is succeeded
+  changed_when: false
+  ignore_errors: yes
+
+- name: Stop existing containers (if any)
   command: docker compose down
   args:
     chdir: "{{ selenoid_base_dir }}"
@@ -75,65 +132,86 @@
   pause:
     seconds: 20
 
-- name: Get Selenoid container logs
-  shell: "docker logs selenoid 2>&1 | tail -50"
-  register: selenoid_logs
+- name: Get GGR container logs
+  shell: "docker logs ggr 2>&1 | tail -50"
+  register: ggr_logs
   ignore_errors: yes
   changed_when: false
 
-- name: Display Selenoid logs
+- name: Display GGR logs
   debug:
-    var: selenoid_logs.stdout_lines
+    var: ggr_logs.stdout_lines
 
-- name: Check if Selenoid container is running (with proper escaping)
-  shell: "docker inspect -f '{{ '{{' }}.State.Running{{ '}}' }}' selenoid 2>/dev/null || echo 'false'"
-  register: selenoid_running
+- name: Get GGR UI container logs
+  shell: "docker logs ggr-ui 2>&1 | tail -50"
+  register: ggr_ui_logs
+  ignore_errors: yes
   changed_when: false
 
-- name: Fail if Selenoid container is not running
-  fail:
-    msg: "Selenoid container failed to start! Check logs above."
-  when: selenoid_running.stdout | trim != "true"
+- name: Display GGR UI logs
+  debug:
+    var: ggr_ui_logs.stdout_lines
 
-- name: Wait for Selenoid API to be ready
+- name: Get first Selenoid container logs
+  shell: "docker logs selenoid-1 2>&1 | tail -50"
+  register: selenoid1_logs
+  ignore_errors: yes
+  changed_when: false
+
+- name: Display first Selenoid logs
+  debug:
+    var: selenoid1_logs.stdout_lines
+
+- name: Check if first Selenoid container is running
+  shell: "docker inspect -f '{{ '{{' }}.State.Running{{ '}}' }}' selenoid-1 2>/dev/null || echo 'false'"
+  register: selenoid1_running
+  changed_when: false
+
+- name: Fail if first Selenoid container is not running
+  fail:
+    msg: "First Selenoid container (selenoid-1) failed to start! Check logs above."
+  when: selenoid1_running.stdout | trim != "true"
+
+- name: Check if second Selenoid container is running
+  shell: "docker inspect -f '{{ '{{' }}.State.Running{{ '}}' }}' selenoid-2 2>/dev/null || echo 'false'"
+  register: selenoid2_running
+  changed_when: false
+
+- name: Fail if second Selenoid container is not running
+  fail:
+    msg: "Second Selenoid container (selenoid-2) failed to start!"
+  when: selenoid2_running.stdout | trim != "true"
+
+- name: Check if GGR container is running
+  shell: "docker inspect -f '{{ '{{' }}.State.Running{{ '}}' }}' ggr 2>/dev/null || echo 'false'"
+  register: ggr_running
+  changed_when: false
+
+- name: Fail if GGR container is not running
+  fail:
+    msg: "GGR container failed to start!"
+  when: ggr_running.stdout | trim != "true"
+
+- name: Wait for GGR API to be ready
   wait_for:
     host: "localhost"
-    port: "{{ selenoid_port }}"
+    port: "{{ ggr_port }}"
     delay: 5
     timeout: 120
-  ignore_errors: yes
-  register: api_check
 
-- name: Get error patterns if API not ready
-  shell: "docker logs selenoid 2>&1 | grep -iE 'error|fail|exception|panic' | head -20"
-  register: error_logs
-  when: api_check.failed
-  ignore_errors: yes
-  changed_when: false
-
-- name: Display error patterns
-  debug:
-    var: error_logs.stdout_lines
-  when: api_check.failed and error_logs.stdout_lines is defined and error_logs.stdout_lines | length > 0
-
-- name: Wait for Selenoid UI to be ready
-  wait_for:
-    host: "localhost"
-    port: "{{ selenoid_ui_port }}"
-    delay: 3
-    timeout: 60
-  ignore_errors: yes
-
-- name: Verify containers status (with proper escaping)
-  shell: "docker ps --filter name=selenoid --format 'table {{ '{{' }}.Names{{ '}}' }}\\t{{ '{{' }}.Status{{ '}}' }}'"
+- name: Verify containers status
+  shell: "docker ps --filter name=selenoid-1 --filter name=selenoid-2 --filter name=ggr --filter name=ggr-ui --format 'table {{ '{{' }}.Names{{ '}}' }}\\t{{ '{{' }}.Status{{ '}}' }}'"
   register: containers_status
   changed_when: false
 
 - name: Display deployment summary
   debug:
     msg:
-      - "✅ Selenoid deployment completed!"
-      - "   Selenoid API: http://{{ inventory_hostname }}:{{ selenoid_port }}/wd/hub"
+      - "✅ Selenoid + GGR deployment completed!"
+      - "   GGR (load balancer): http://{{ inventory_hostname }}:{{ ggr_port }}/wd/hub"
+      - "   First Selenoid direct: http://{{ inventory_hostname }}:{{ selenoid1_port }}/wd/hub"
+      - "   Second Selenoid direct: http://{{ inventory_hostname }}:{{ selenoid2_port }}/wd/hub"
       - "   Selenoid UI:  http://{{ inventory_hostname }}:{{ selenoid_ui_port }}"
+      - "   GGR UI:       http://{{ inventory_hostname }}:{{ ggr_ui_port }}"
       - "   Containers:"
       - "{{ containers_status.stdout | indent(4) }}"

@@ -1,0 +1,14 @@
+[ggr]
+listen = ":4444"
+timeout = "60s"
+disable_auth = true
+
+[[nodes]]
+name = "selenoid-1"
+url = "http://selenoid-1:4444"
+weight = 1
+
+[[nodes]]
+name = "selenoid-2"
+url = "http://selenoid-2:4444"
+weight = 1

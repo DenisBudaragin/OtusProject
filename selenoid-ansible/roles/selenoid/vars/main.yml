@@ -18,16 +18,35 @@ chrome_image: "selenoid/vnc:chrome_{{ chrome_version }}"
 firefox_image: "selenoid/vnc:firefox_{{ firefox_version }}"
 opera_image: "selenoid/vnc:opera_{{ opera_version }}"
 
-# Ports
-selenoid_port: 4444
+# Ports for first Selenoid and UI
+selenoid1_port: 4445                # был selenoid_port
 selenoid_ui_port: 8080
 
-# Directories
+# Ports for second Selenoid
+selenoid2_port: 4446
+
+# GGR and GGR UI
+ggr_version: "latest-release"
+ggr_ui_version: "latest-release"
+ggr_port: 4444
+ggr_ui_port: 8081
+
+# Directories for first Selenoid (остаются без изменений)
 selenoid_base_dir: "/opt/selenoid"
 selenoid_config_dir: "{{ selenoid_base_dir }}/config"
 selenoid_video_dir: "{{ selenoid_base_dir }}/video"
 selenoid_logs_dir: "{{ selenoid_base_dir }}/logs"
 selenoid_download_dir: "{{ selenoid_base_dir }}/download"
+
+# Directories for second Selenoid
+selenoid2_base_dir: "/opt/selenoid2"
+selenoid2_config_dir: "{{ selenoid2_base_dir }}/config"
+selenoid2_video_dir: "{{ selenoid2_base_dir }}/video"
+selenoid2_logs_dir: "{{ selenoid2_base_dir }}/logs"
+selenoid2_download_dir: "{{ selenoid2_base_dir }}/download"
+
+# GGR directories
+ggr_config_dir: "/opt/ggr/config"
 
 # Docker settings
 docker_network_name: "selenoid_network"

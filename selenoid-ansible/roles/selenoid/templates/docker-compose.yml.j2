@@ -1,17 +1,39 @@
 services:
-  selenoid:
+  selenoid-1:
     image: aerokube/selenoid:{{ selenoid_version }}
-    container_name: selenoid
+    container_name: selenoid-1
     networks:
       - selenoid_network
     ports:
-      - "{{ selenoid_port }}:4444"
+      - "{{ selenoid1_port }}:4444"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "{{ selenoid_config_dir }}/browsers.json:/etc/selenoid/browsers.json:ro"
       - "{{ selenoid_video_dir }}:/opt/selenoid/video"
       - "{{ selenoid_logs_dir }}:/opt/selenoid/logs"
       - "{{ selenoid_download_dir }}:/opt/selenoid/download"
+    environment:
+      - OVERRIDE_VIDEO_OUTPUT_DIR=/opt/selenoid/video
+      - DOCKER_API_VERSION=1.44
+      - TZ=Europe/Moscow
+    command: "-conf /etc/selenoid/browsers.json -video-output-dir /opt/selenoid/video -log-output-dir /opt/selenoid/logs -container-network {{ docker_network_name }} -limit 10 -enable-file-upload"
+    restart: unless-stopped
+    shm_size: "2gb"
+    mem_limit: "2g"
+
+  selenoid-2:
+    image: aerokube/selenoid:{{ selenoid_version }}
+    container_name: selenoid-2
+    networks:
+      - selenoid_network
+    ports:
+      - "{{ selenoid2_port }}:4444"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "{{ selenoid2_config_dir }}/browsers.json:/etc/selenoid/browsers.json:ro"
+      - "{{ selenoid2_video_dir }}:/opt/selenoid/video"
+      - "{{ selenoid2_logs_dir }}:/opt/selenoid/logs"
+      - "{{ selenoid2_download_dir }}:/opt/selenoid/download"
     environment:
       - OVERRIDE_VIDEO_OUTPUT_DIR=/opt/selenoid/video
       - DOCKER_API_VERSION=1.44
@@ -29,10 +51,46 @@ services:
     ports:
       - "{{ selenoid_ui_port }}:8080"
     depends_on:
-      - selenoid
+      - selenoid-1
     environment:
       - TZ=Europe/Moscow
-    command: "--selenoid-uri http://selenoid:4444"
+    command: "--selenoid-uri http://selenoid-1:4444"
+    restart: unless-stopped
+    mem_limit: "512m"
+
+  ggr:
+    image: aerokube/ggr:{{ ggr_version }}
+    container_name: ggr
+    networks:
+      - selenoid_network
+    ports:
+      - "{{ ggr_port }}:4444"
+    volumes:
+      - "{{ ggr_config_dir }}/ggr.conf:/etc/ggr/ggr.conf:ro"
+      - "{{ ggr_config_dir }}/users.htpasswd:/etc/grid-router/users.htpasswd:ro"
+      - "{{ ggr_config_dir }}/quota:/etc/grid-router/quota:ro"
+    depends_on:
+      - selenoid-1
+      - selenoid-2
+    environment:
+      - TZ=Europe/Moscow
+    restart: unless-stopped
+    mem_limit: "512m"
+
+  ggr-ui:
+    image: aerokube/ggr-ui:{{ ggr_ui_version }}
+    container_name: ggr-ui
+    networks:
+      - selenoid_network
+    ports:
+      - "{{ ggr_ui_port }}:8080"
+    volumes:
+      - "{{ ggr_config_dir }}/quota:/etc/grid-router/quota:ro"
+    depends_on:
+      - ggr
+    environment:
+      - TZ=Europe/Moscow
+      - GGR_URL=http://ggr:4444
     restart: unless-stopped
     mem_limit: "512m"
 
