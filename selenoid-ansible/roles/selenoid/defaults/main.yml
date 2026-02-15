@@ -1,5 +1,5 @@
 ---
-# Docker Hub credentials
+# Docker Hub credentials (commented out, not used)
 #docker_hub_username: "{{ lookup('env', 'DOCKER_HUB_USERNAME') | default('', true) }}"
 #docker_hub_password: "{{ lookup('env', 'DOCKER_HUB_PASSWORD') | default('', true) }}"
 

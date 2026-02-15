@@ -1,0 +1,16 @@
+---
+- name: Check Docker installation
+  command: docker --version
+  register: docker_version
+  changed_when: false
+
+- name: Display Docker version
+  debug:
+    msg: "Docker version: {{ docker_version.stdout }}"
+
+- name: Ensure Docker Compose plugin is installed
+  apt:
+    name: docker-compose-plugin
+    state: present
+    update_cache: yes
+  when: ansible_os_family == "Debian"
