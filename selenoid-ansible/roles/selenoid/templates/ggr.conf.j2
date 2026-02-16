@@ -1,7 +1,9 @@
 [ggr]
 listen = ":4444"
 timeout = "60s"
-disable_auth = true
+guests_allowed = true
+guests_quota = "default"
+quota_dir = "/etc/grid-router/quota"
 
 [[nodes]]
 name = "selenoid-1"

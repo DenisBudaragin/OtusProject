@@ -1,0 +1,3 @@
+- name: restart ggr
+  command: docker restart ggr
+  changed_when: true

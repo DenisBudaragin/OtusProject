@@ -29,12 +29,11 @@
     state: directory
     mode: "0755"
 
-- name: Create empty users.htpasswd file for GGR
-  copy:
-    content: ""
-    dest: "{{ ggr_config_dir }}/users.htpasswd"
-    force: no
-    mode: "0644"
+- name: Remove users.htpasswd to allow guest access
+  file:
+    path: "{{ ggr_config_dir }}/users.htpasswd"
+    state: absent
+  tags: ggr_config
 
 - name: Create quota directory for GGR
   file:
@@ -42,12 +41,12 @@
     state: directory
     mode: "0755"
 
-- name: Create default quota file (correct XML format)
-  copy:
-    content: "<browsers></browsers>"
+- name: Create default quota file with browser configurations
+  template:
+    src: quota.xml.j2
     dest: "{{ ggr_config_dir }}/quota/default.xml"
-    force: yes
     mode: "0644"
+  tags: ggr_config
 
 - name: Create docker-compose.yml from template
   template:
@@ -83,20 +82,39 @@
   changed_when: false
   tags: pull_browsers
 
-# (Аналогичные задачи для Firefox и Opera можно раскомментировать)
+#- name: Pull Firefox browser image
+#  command: docker pull "{{ firefox_image }}"
+#  register: pull_firefox
+#  retries: 3
+#  delay: 5
+#  until: pull_firefox is succeeded
+#  changed_when: false
+#  tags: pull_browsers
+#  when: false  # Раскомментируйте если нужен Firefox
+
+#- name: Pull Opera browser image
+#  command: docker pull "{{ opera_image }}"
+#  register: pull_opera
+#  retries: 3
+#  delay: 5
+#  until: pull_opera is succeeded
+#  changed_when: false
+#  tags: pull_browsers
+#  when: false  # Раскомментируйте если нужна Opera
 
 - name: Remove any conflicting containers from previous manual runs
-  shell: docker rm -f ggr ggr-ui 2>/dev/null || true
+  shell: docker rm -f ggr ggr-ui selenoid-1 selenoid-2 selenoid-ui 2>/dev/null || true
   changed_when: false
+  tags: cleanup
 
-- name: Pull GGR image (если ещё нет)
+- name: Pull GGR image
   command: docker pull aerokube/ggr:{{ ggr_version }}
   register: pull_ggr
   retries: 3
   delay: 5
   until: pull_ggr is succeeded
   changed_when: false
-  ignore_errors: yes   # образ уже есть на хосте – не критично
+  ignore_errors: yes
 
 - name: Pull GGR UI image
   command: docker pull aerokube/ggr-ui:{{ ggr_ui_version }}
@@ -112,6 +130,7 @@
   args:
     chdir: "{{ selenoid_base_dir }}"
   ignore_errors: yes
+  tags: restart
 
 - name: Pull images explicitly
   command: docker compose pull
@@ -121,46 +140,58 @@
   retries: 3
   delay: 5
   until: pull_result is succeeded
+  tags: restart
 
 - name: Start Selenoid stack
   command: docker compose up -d --remove-orphans
   args:
     chdir: "{{ selenoid_base_dir }}"
   register: compose_result
+  tags: restart
 
 - name: Wait for containers to start
   pause:
     seconds: 20
+  tags: restart
 
 - name: Get GGR container logs
   shell: "docker logs ggr 2>&1 | tail -50"
   register: ggr_logs
   ignore_errors: yes
   changed_when: false
+  tags: debug
 
 - name: Display GGR logs
   debug:
     var: ggr_logs.stdout_lines
+  when: ggr_logs.stdout_lines | length > 0
+  tags: debug
 
 - name: Get GGR UI container logs
   shell: "docker logs ggr-ui 2>&1 | tail -50"
   register: ggr_ui_logs
   ignore_errors: yes
   changed_when: false
+  tags: debug
 
 - name: Display GGR UI logs
   debug:
     var: ggr_ui_logs.stdout_lines
+  when: ggr_ui_logs.stdout_lines | length > 0
+  tags: debug
 
 - name: Get first Selenoid container logs
   shell: "docker logs selenoid-1 2>&1 | tail -50"
   register: selenoid1_logs
   ignore_errors: yes
   changed_when: false
+  tags: debug
 
 - name: Display first Selenoid logs
   debug:
     var: selenoid1_logs.stdout_lines
+  when: selenoid1_logs.stdout_lines | length > 0
+  tags: debug
 
 - name: Check if first Selenoid container is running
   shell: "docker inspect -f '{{ '{{' }}.State.Running{{ '}}' }}' selenoid-1 2>/dev/null || echo 'false'"
@@ -198,6 +229,7 @@
     port: "{{ ggr_port }}"
     delay: 5
     timeout: 120
+  when: ggr_running.stdout | trim == "true"
 
 - name: Verify containers status
   shell: "docker ps --filter name=selenoid-1 --filter name=selenoid-2 --filter name=ggr --filter name=ggr-ui --format 'table {{ '{{' }}.Names{{ '}}' }}\\t{{ '{{' }}.Status{{ '}}' }}'"
