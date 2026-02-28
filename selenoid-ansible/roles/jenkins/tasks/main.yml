@@ -1,0 +1,189 @@
+---
+- name: Create Jenkins directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ jenkins_home }}"
+    - "{{ jenkins_home }}/jobs"
+    - "{{ jenkins_home }}/plugins"
+    - "{{ jenkins_home }}/workspace"
+    - "{{ jenkins_backup_dir }}"
+
+- name: Set proper ownership for Jenkins home
+  file:
+    path: "{{ jenkins_home }}"
+    owner: "1000"
+    group: "1000"
+    recurse: yes
+  when: ansible_os_family == "Debian"
+
+- name: Pull Jenkins image
+  docker_image:
+    name: "{{ jenkins_image }}"
+    source: pull
+  register: pull_jenkins
+  retries: 3
+  delay: 5
+  until: pull_jenkins is succeeded
+
+- name: Check if Jenkins container exists
+  docker_container_info:
+    name: jenkins
+  register: jenkins_container
+
+- name: Stop and remove existing Jenkins container
+  docker_container:
+    name: jenkins
+    state: absent
+  when: jenkins_container.exists
+
+- name: Run Jenkins container as root user
+  docker_container:
+    name: jenkins
+    image: "{{ jenkins_image }}"
+    state: started
+    restart_policy: always
+    user: root
+    ports:
+      - "{{ jenkins_port }}:8080"
+      - "{{ jenkins_agent_port }}:50000"
+    volumes:
+      - "{{ jenkins_home }}:/var/jenkins_home"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/usr/bin/docker:/usr/bin/docker"
+      - "{{ selenoid_base_dir }}:/opt/selenoid:ro"
+      - "{{ jenkins_backup_dir }}:/var/jenkins_backup"
+    env:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
+    networks:
+      - name: "{{ docker_network_name }}"
+  register: jenkins_run
+
+- name: Wait for Jenkins container to be fully running
+  pause:
+    seconds: 30
+
+- name: Check Jenkins logs for initialization
+  shell: "docker logs jenkins 2>&1 | tail -100"
+  register: jenkins_logs_check
+  changed_when: false
+
+- name: Display Jenkins logs for debugging
+  debug:
+    var: jenkins_logs_check.stdout_lines
+  when: jenkins_logs_check.stdout_lines | length > 0
+
+- name: Wait for Jenkins to be ready (HTTP check)
+  uri:
+    url: "http://{{ inventory_hostname }}:{{ jenkins_port }}"
+    status_code: 200,403
+  register: jenkins_http_check
+  retries: 30
+  delay: 10
+  until: jenkins_http_check.status in [200, 403]
+  ignore_errors: yes
+
+- name: Get initial admin password from container
+  shell: |
+    if docker exec jenkins test -f /var/jenkins_home/secrets/initialAdminPassword; then
+      docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+    elif docker exec jenkins test -f /var/jenkins_home/secrets/initialAdminPassword; then
+      docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+    else
+      echo "password_not_found"
+    fi
+  register: jenkins_initial_password
+  changed_when: false
+  ignore_errors: yes
+
+- name: Display initial admin password
+  debug:
+    msg: "Jenkins initial admin password: {{ jenkins_initial_password.stdout }}"
+  when: jenkins_initial_password.stdout is defined and jenkins_initial_password.stdout != 'password_not_found'
+
+- name: Alternative - Get password from logs if file not found
+  shell: |
+    docker logs jenkins 2>&1 | grep -A 2 "Please use the following password to proceed to installation:" | tail -1 | tr -d ' '
+  register: jenkins_password_from_logs
+  changed_when: false
+  when: jenkins_initial_password.stdout == 'password_not_found' or jenkins_initial_password.stdout is not defined
+
+- name: Display password from logs
+  debug:
+    msg: "Jenkins initial admin password (from logs): {{ jenkins_password_from_logs.stdout }}"
+  when: jenkins_password_from_logs.stdout is defined and jenkins_password_from_logs.stdout != ''
+
+- name: Install recommended plugins
+  shell: |
+    docker exec jenkins jenkins-plugin-cli --plugins {{ jenkins_plugins | join(' ') }}
+  register: plugin_install
+  changed_when: plugin_install.rc == 0
+  retries: 3
+  delay: 10
+  until: plugin_install is succeeded
+  when: jenkins_install_plugins
+  ignore_errors: yes
+
+- name: Restart Jenkins after plugin installation
+  docker_container:
+    name: jenkins
+    state: started
+    restart: yes
+  when: plugin_install is changed
+
+- name: Wait for Jenkins after restart
+  wait_for:
+    port: "{{ jenkins_port }}"
+    host: "{{ inventory_hostname }}"
+    delay: 30
+    timeout: 180
+  when: plugin_install is changed
+
+- name: Create Test_Job directory
+  file:
+    path: "{{ jenkins_home }}/jobs/Test_Job"
+    state: directory
+    mode: "0755"
+  when: jenkins_create_test_job
+
+- name: Create test job configuration
+  template:
+    src: test_job_config.xml.j2
+    dest: "{{ jenkins_home }}/jobs/Test_Job/config.xml"
+    mode: "0644"
+  when: jenkins_create_test_job
+  notify: reload jenkins configuration
+
+- name: Get final Jenkins container logs
+  shell: "docker logs jenkins 2>&1 | tail -50"
+  register: jenkins_logs
+  ignore_errors: yes
+  changed_when: false
+  tags: debug
+
+- name: Check if Jenkins container is running
+  shell: "docker inspect -f '{{ '{{' }}.State.Running{{ '}}' }}' jenkins 2>/dev/null || echo 'false'"
+  register: jenkins_running
+  changed_when: false
+
+- name: Display Jenkins access information
+  debug:
+    msg:
+      - "✅ Jenkins deployment completed!"
+      - "   Jenkins URL: http://{{ inventory_hostname }}:{{ jenkins_port }}"
+      - ""
+      - "   🔑 To get the initial admin password, run one of these commands on the server:"
+      - "      docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword"
+      - "      OR"
+      - "      docker logs jenkins 2>&1 | grep -A 2 'Please use the following password'"
+      - ""
+      - "   📝 Default login: admin + the password from above"
+      - "   Jenkins Home: {{ jenkins_home }}"
+      - "   Container status: {{ 'Running' if jenkins_running.stdout | trim == 'true' else 'Not running' }}"
+      - ""
+      - "   🔗 For Selenoid integration, use in your Jenkins jobs:"
+      - "   - Selenoid Hub: http://ggr:4444/wd/hub"
+      - "   - Selenoid UI: http://{{ inventory_hostname }}:{{ selenoid_ui_port }}"
+      - "   - GGR UI: http://{{ inventory_hostname }}:{{ ggr_ui_port }}"

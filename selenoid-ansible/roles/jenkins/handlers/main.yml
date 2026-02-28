@@ -1,0 +1,5 @@
+---
+- name: reload jenkins configuration
+  shell: |
+    docker exec jenkins jenkins-cli -s http://localhost:8080 reload-configuration --username admin --password $(docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword)
+  ignore_errors: yes

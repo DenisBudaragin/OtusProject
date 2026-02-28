@@ -3,6 +3,16 @@
   hosts: selenoid
   become: yes
   gather_facts: yes
+
+  tasks:
+    - name: Create Docker network for all containers
+      docker_network:
+        name: "{{ docker_network_name }}"
+        state: present
+      when: ansible_os_family == "Debian"
+      tags: network
+
   roles:
     - docker_setup
     - selenoid
+    - jenkins

@@ -1,0 +1,31 @@
+---
+# Jenkins configuration
+jenkins_image: "jenkins/jenkins:lts-jdk17"
+jenkins_port: 8090
+jenkins_agent_port: 50001
+jenkins_home: "/opt/jenkins_home"
+jenkins_backup_dir: "/opt/jenkins_backup"
+
+# Jenkins plugins to install (исправленные названия плагинов)
+jenkins_plugins:
+  - "git"
+  - "workflow-aggregator"
+  - "blueocean"
+  - "docker-workflow"
+  - "docker-plugin"
+  - "htmlpublisher"  # было html-publisher
+  - "junit"
+  - "github"
+  - "gitlab-plugin"
+  - "ssh-agent"
+  - "credentials-binding"
+  - "timestamper"
+  - "build-timeout"
+  - "ws-cleanup"
+  - "ansible"
+  - "pipeline-utility-steps"
+  # selenoid-plugin временно убираем, так как его нет в официальном репозитории
+
+# Flags
+jenkins_install_plugins: true
+jenkins_create_test_job: true
