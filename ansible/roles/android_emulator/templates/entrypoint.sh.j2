@@ -1,0 +1,68 @@
+#!/bin/bash
+set -e
+
+echo "Starting Android Emulator container..."
+
+# Проверка и настройка binder модулей
+if ! lsmod | grep -q binder; then
+    echo "Loading binder module..."
+    modprobe binder_linux 2>/dev/null || true
+fi
+
+# Настройка KVM
+if [ -e /dev/kvm ]; then
+    chmod 666 /dev/kvm
+    echo "KVM available - hardware acceleration enabled"
+fi
+
+# Запуск ADB сервера
+adb start-server
+
+# Эмулятор уже должен быть запущен (redroid)
+echo "Waiting for emulator to be ready..."
+MAX_RETRIES=30
+RETRY_COUNT=0
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+    if adb devices | grep -q "emulator"; then
+        break
+    fi
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+    echo "Waiting for emulator... ($RETRY_COUNT/$MAX_RETRIES)"
+    sleep 5
+done
+
+# Ожидание полной загрузки
+echo "Waiting for device to boot completely..."
+adb wait-for-device
+adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 5; done;'
+
+# Оптимизация для тестов
+adb shell settings put global window_animation_scale 0
+adb shell settings put global transition_animation_scale 0
+adb shell settings put global animator_duration_scale 0
+
+echo "✅ Emulator is ready and fully booted!"
+
+# Запуск Appium сервера
+echo "Starting Appium server on port {{ appium_port }}..."
+appium \
+    --address 0.0.0.0 \
+    --port {{ appium_port }} \
+    --allow-cors \
+    --log {{ android_logs_dir }}/appium.log &
+
+# Проверка Appium
+sleep 5
+if curl -s http://localhost:{{ appium_port }}/status > /dev/null; then
+    echo "✅ Appium server is running"
+fi
+
+echo "==========================================="
+echo "✅ Android Emulator is ready!"
+echo "   ADB: localhost:5555"
+echo "   Appium: http://localhost:{{ appium_port }}"
+echo "==========================================="
+
+# Держим контейнер запущенным
+tail -f /dev/null

@@ -1,0 +1,23 @@
+{
+  "platformName": "Android",
+  "appium:platformVersion": "{{ android_platform_version }}",
+  "appium:deviceName": "{{ android_device }}",
+  "appium:app": "{{ android_apps_dir }}/{{ test_app_name }}",
+  "appium:automationName": "{{ appium_capabilities.automationName }}",
+  "appium:autoGrantPermissions": {{ appium_capabilities.autoGrantPermissions | lower }},
+  "appium:autoAcceptAlerts": {{ appium_capabilities.autoAcceptAlerts | lower }},
+  "appium:noReset": {{ appium_capabilities.noReset | lower }},
+  "appium:fullReset": {{ appium_capabilities.fullReset | lower }},
+  "appium:newCommandTimeout": {{ appium_capabilities.newCommandTimeout }},
+  "appium:appWaitForLaunch": {{ appium_capabilities.appWaitForLaunch | lower }},
+  "appium:appWaitDuration": {{ appium_capabilities.appWaitDuration }},
+  "appium:gpsEnabled": {{ appium_capabilities.gpsEnabled | lower }},
+  "appium:wifiEnabled": {{ appium_capabilities.wifiEnabled | lower }},
+  "appium:locale": "{{ appium_capabilities.locale }}",
+  "appium:language": "{{ appium_capabilities.language }}",
+  "appium:avd": "{{ android_device }}",
+  "appium:avdArgs": "-no-window -no-audio -memory {{ emulator_ram }} -partition-size {{ emulator_disk_size }}",
+  "appium:avdLaunchTimeout": 120000,
+  "appium:avdReadyTimeout": 120000,
+  "appium:adbPort": {{ adb_port }}
+}

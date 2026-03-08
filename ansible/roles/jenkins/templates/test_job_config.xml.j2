@@ -1,6 +1,6 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
-  <description>Test Job for Selenoid Integration</description>
+  <description>Test Job for Selenoid and Android Integration</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -22,18 +22,49 @@
   <builders>
     <hudson.tasks.Shell>
       <command>
-echo "Starting tests on Selenoid..."
+echo "========================================="
+echo "Starting tests on Web (Selenoid)..."
+echo "========================================="
 echo "Selenoid Hub: http://ggr:4444/wd/hub"
 echo "Chrome version: {{ chrome_version }}"
 
-# Example of running a test
+# Example Web test
 # mvn clean test -Dselenoid.hub=http://ggr:4444/wd/hub -Dbrowser=chrome -Dversion={{ chrome_version }}
+
+echo ""
+echo "========================================="
+echo "Starting tests on Android Emulator..."
+echo "========================================="
+echo "Appium Server: http://android-emulator:{{ appium_port }}"
+echo "Test App: {{ test_app_name }}"
+
+# Check if Android emulator is ready
+adb connect android-emulator:5555
+adb devices
+
+# Run Android tests (example for Appium/Espresso)
+# For Appium Java tests:
+# mvn clean test -Dappium.hub=http://android-emulator:{{ appium_port }} -Dplatform=android -Dapp={{ android_apps_dir }}/{{ test_app_name }}
+
+# For direct adb commands:
+echo "Checking installed packages..."
+adb shell pm list packages | grep -i test
+
+# Run instrumentation tests if available
+# adb shell am instrument -w com.example.test/androidx.test.runner.AndroidJUnitRunner
+
+# Save test results
+mkdir -p android-test-results
+adb pull /sdcard/test-results ./android-test-results/ || true
+
+echo ""
+echo "✅ Tests completed. Results saved to android-test-results/"
       </command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
     <hudson.tasks.junit.JUnitResultArchiver>
-      <testResults>**/target/surefire-reports/*.xml</testResults>
+      <testResults>**/target/surefire-reports/*.xml, android-test-results/*.xml</testResults>
       <keepLongStdio>false</keepLongStdio>
       <healthScaleFactor>1.0</healthScaleFactor>
     </hudson.tasks.junit.JUnitResultArchiver>

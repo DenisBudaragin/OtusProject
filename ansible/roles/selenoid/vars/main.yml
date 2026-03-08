@@ -60,3 +60,10 @@ jenkins_home: "/opt/jenkins_home"
 jenkins_backup_dir: "/opt/jenkins_backup"
 jenkins_install_plugins: true
 jenkins_create_test_job: true
+
+# Android Emulator configuration (добавить в конец)
+android_base_dir: "/opt/android-emulator"
+android_apps_dir: "{{ android_base_dir }}/apps"
+android_results_dir: "{{ android_base_dir }}/test-results"
+appium_port: 4723
+test_app_name: "app-debug.apk"

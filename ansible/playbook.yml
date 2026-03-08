@@ -1,18 +1,46 @@
 ---
-- name: Deploy Selenoid with VNC and Selenoid UI
+- name: Deploy Selenoid with VNC, Selenoid UI and Android Emulator
   hosts: selenoid
   become: yes
   gather_facts: yes
 
   tasks:
-    - name: Create Docker network for all containers
-      docker_network:
-        name: "{{ docker_network_name }}"
+    - name: Ensure binder module is loaded
+      modprobe:
+        name: binder_linux
         state: present
       when: ansible_os_family == "Debian"
-      tags: network
+      tags: android
+      ignore_errors: yes
+
+    - name: Create binderfs directory if needed
+      file:
+        path: /dev/binderfs
+        state: directory
+        mode: "0755"
+      when: ansible_os_family == "Debian"
+      tags: android
+
+    - name: Mount binderfs
+      mount:
+        path: /dev/binderfs
+        src: none
+        fstype: binder
+        opts: defaults
+        state: mounted
+      when: ansible_os_family == "Debian"
+      tags: android
+      ignore_errors: yes
+
+    - name: Ensure KVM permissions
+      file:
+        path: /dev/kvm
+        mode: "0666"
+      when: ansible_os_family == "Debian"
+      tags: android
 
   roles:
     - docker_setup
     - selenoid
+    - android_emulator
     - jenkins

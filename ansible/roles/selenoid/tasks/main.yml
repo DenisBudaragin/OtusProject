@@ -1,4 +1,12 @@
 ---
+- name: Ensure Docker network exists
+  docker_network:
+    name: "{{ docker_network_name }}"
+    state: present
+    driver: bridge
+  when: ansible_os_family == "Debian"
+  tags: network
+
 - name: Create Selenoid directories (first instance)
   file:
     path: "{{ item }}"

@@ -1,0 +1,56 @@
+# Android Emulator Configuration
+android_enabled: true
+android_base_dir: "/opt/android-emulator"
+android_apps_dir: "{{ android_base_dir }}/apps"
+android_results_dir: "{{ android_base_dir }}/test-results"
+android_config_dir: "{{ android_base_dir }}/config"
+android_avd_dir: "{{ android_base_dir }}/avd"
+android_logs_dir: "{{ android_base_dir }}/logs"
+
+# Appium Configuration
+appium_port: 4723
+appium_version: "2.5.1"
+
+# Android Emulator Configuration - используем правильные теги redroid
+android_platform_version: "13"
+android_api_level: "33"
+android_abi: "google_apis/x86_64"
+android_device: "pixel_6"
+
+# Docker image - правильный формат для Ubuntu 24.04
+android_emulator_image: "redroid/redroid"
+android_emulator_tag: "13.0.0-latest"  # 13.0.0-latest
+
+# Для Android 14 используйте:
+# android_platform_version: "14"
+# android_emulator_tag: "14.0.0-latest"
+
+# Emulator hardware config
+emulator_ram: "4096"
+emulator_vm_heap: "512"
+emulator_disk_size: "8000M"
+emulator_gpu: "guest"  # Важно: используем SwiftShader для рендеринга
+timezone: "Europe/Moscow"
+android_container_mem_limit: "4g"
+android_container_cpu_limit: "2"
+
+# Test app configuration
+test_app_name: "wishlist-349317-5fd795.apk"
+test_app_source: "{{ playbook_dir }}/files/{{ test_app_name }}"
+test_app_destination: "{{ android_apps_dir }}/{{ test_app_name }}"
+test_app_package: "com.example.app"  # Замените на ваш package name
+
+# ADB Configuration
+adb_port: 5555
+
+# Network
+docker_network_name: "selenoid_network"
+
+# Важно: параметры для запуска redroid на Ubuntu 24.04
+redroid_extra_args:
+  - "androidboot.redroid_gpu_mode=guest"
+  - "androidboot.redroid_memfd=true"  # Включаем memfd вместо ashmem
+  - "androidboot.redroid_width=1080"
+  - "androidboot.redroid_height=1920"
+  - "androidboot.redroid_dpi=480"
+  - "androidboot.redroid_fps=30"

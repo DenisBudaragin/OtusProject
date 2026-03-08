@@ -1,0 +1,35 @@
+services:
+  android-emulator:
+    image: {{ android_emulator_image }}:{{ android_emulator_tag }}
+    container_name: android-emulator
+    restart: unless-stopped
+    privileged: true
+    networks:
+      - {{ docker_network_name }}
+    ports:
+      - "5555:5555"
+    volumes:
+      - {{ android_apps_dir }}:{{ android_apps_dir }}
+      - {{ android_results_dir }}:{{ android_results_dir }}
+      - {{ android_avd_dir }}:/data
+      - /dev/binderfs:/dev/binderfs:rw
+      - /dev/kvm:/dev/kvm
+    devices:
+      - /dev/kvm
+    environment:
+      - ANDROID_ADB_SERVER_PORT=5037
+      - TZ={{ timezone | default('Europe/Moscow') }}
+    command:
+      - "androidboot.redroid_gpu_mode={{ emulator_gpu | default('guest') }}"
+      - "androidboot.redroid_memfd=true"
+      - "androidboot.redroid_width=1080"
+      - "androidboot.redroid_height=1920"
+      - "androidboot.redroid_dpi=480"
+      - "androidboot.redroid_fps=30"
+    mem_limit: {{ android_container_mem_limit | default('4g') }}
+    cpus: "{{ android_container_cpu_limit | default('2') }}"
+
+networks:
+  {{ docker_network_name }}:
+    external: true
+    name: {{ docker_network_name }}

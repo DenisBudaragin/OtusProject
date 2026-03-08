@@ -1,0 +1,63 @@
+---
+- name: restart android emulator
+  shell: |
+    cd {{ android_base_dir }} && docker compose restart android-emulator
+  register: restart_result
+  ignore_errors: yes
+
+- name: restart appium server
+  shell: |
+    docker exec android-emulator pkill -f appium
+    docker exec android-emulator appium --address 0.0.0.0 --port {{ appium_port }} --allow-cors --log {{ android_logs_dir }}/appium.log &
+  ignore_errors: yes
+
+- name: reload android configuration
+  shell: |
+    cd {{ android_base_dir }} && docker compose down && docker compose up -d
+  ignore_errors: yes
+
+- name: clear android cache
+  shell: |
+    docker exec android-emulator adb shell pm clear {{ test_app_package }} || true
+  ignore_errors: yes
+
+- name: restart adb server
+  shell: |
+    docker exec android-emulator adb kill-server
+    docker exec android-emulator adb start-server
+  ignore_errors: yes
+
+- name: wipe emulator data
+  shell: |
+    cd {{ android_base_dir }} && docker compose down -v && docker compose up -d
+  ignore_errors: yes
+
+- name: restart network
+  shell: |
+    docker network connect {{ docker_network_name }} android-emulator 2>/dev/null || true
+  ignore_errors: yes
+
+- name: notify jenkins
+  uri:
+    url: "http://localhost:{{ jenkins_port }}/job/Test_Job/build?token=android_ready"
+    method: POST
+  ignore_errors: yes
+  when: jenkins_port is defined
+
+- name: save logs
+  shell: |
+    docker logs android-emulator > {{ android_logs_dir }}/emulator-{{ ansible_date_time.epoch }}.log 2>&1
+  ignore_errors: yes
+
+- name: cleanup old containers
+  shell: |
+    docker system prune -f --filter "until=24h"
+  ignore_errors: yes
+  when: cleanup_old_containers
+
+- name: send notification
+  debug:
+    msg:
+      - "🔄 Android Emulator handler triggered: {{ handler_name }}"
+      - "Time: {{ ansible_date_time.iso8601 }}"
+      - "Status: {{ restart_result is defined and restart_result is succeeded }}"

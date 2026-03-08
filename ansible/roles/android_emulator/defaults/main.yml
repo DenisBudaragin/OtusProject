@@ -1,0 +1,39 @@
+---
+# Android Emulator Configuration
+android_enabled: true
+android_base_dir: "/opt/android-emulator"
+android_apps_dir: "{{ android_base_dir }}/apps"
+android_results_dir: "{{ android_base_dir }}/test-results"
+android_config_dir: "{{ android_base_dir }}/config"
+android_avd_dir: "{{ android_base_dir }}/avd"
+
+# Appium Configuration
+appium_port: 4723
+appium_version: "2.5.1"
+
+# Android Emulator Configuration
+android_sdk_version: "11076708"  # Command line tools version
+android_platform_version: "34"    # Android 14
+android_api_level: "34"
+android_abi: "google_apis/x86_64"
+android_device: "pixel_6"
+
+# Emulator hardware config
+emulator_ram: "4096"
+emulator_vm_heap: "512"
+emulator_disk_size: "8000M"
+emulator_gpu: "auto"
+
+# Test app configuration
+test_app_name: "wishlist-349317-5fd795.apk"  # Имя вашего APK файла
+#test_app_source: "/local/path/to/{{ test_app_name }}"  # Локальный путь к APK
+test_app_source: "{{ playbook_dir }}/files/{{ test_app_name }}"  # Локальный путь к APK
+test_app_destination: "{{ android_apps_dir }}/{{ test_app_name }}"
+
+# Test parameters
+test_timeout: "3600"  # 1 hour in seconds
+test_retries: 3
+
+# Docker image
+android_emulator_image: "budtmo/docker-android-x86-{{ android_platform_version }}"
+android_emulator_tag: "latest"
