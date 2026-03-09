@@ -5,42 +5,49 @@
   gather_facts: yes
 
   tasks:
-    - name: Ensure binder module is loaded
-      modprobe:
-        name: binder_linux
+    - name: Create Docker network for all containers
+      docker_network:
+        name: "{{ docker_network_name }}"
         state: present
+        driver: bridge
       when: ansible_os_family == "Debian"
-      tags: android
-      ignore_errors: yes
-
-    - name: Create binderfs directory if needed
-      file:
-        path: /dev/binderfs
-        state: directory
-        mode: "0755"
-      when: ansible_os_family == "Debian"
-      tags: android
-
-    - name: Mount binderfs
-      mount:
-        path: /dev/binderfs
-        src: none
-        fstype: binder
-        opts: defaults
-        state: mounted
-      when: ansible_os_family == "Debian"
-      tags: android
-      ignore_errors: yes
+      tags:
+        - always
+        - network
 
     - name: Ensure KVM permissions
       file:
         path: /dev/kvm
         mode: "0666"
       when: ansible_os_family == "Debian"
-      tags: android
+      tags:
+        - always
+        - android
+        - kvm
 
   roles:
-    - docker_setup
-    - selenoid
-    - android_emulator
-    - jenkins
+    - role: docker_setup
+      tags:
+        - docker
+        - docker_setup
+        - always
+
+    - role: selenoid
+      tags:
+        - selenoid
+        - browsers
+        - ggr
+        - web
+
+    - role: android_emulator
+      tags:
+        - android
+        - android_emulator
+        - appium
+        - mobile
+
+    - role: jenkins
+      tags:
+        - jenkins
+        - ci
+        - pipeline
