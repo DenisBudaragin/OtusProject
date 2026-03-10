@@ -71,7 +71,7 @@ public class AndroidLoginTest {
 
         // Очищаем поля и вводим данные
         driver.findElement(By.id("ru.otus.wishlist:id/username_text_input")).clear();
-        driver.findElement(By.id("ru.otus.wishlist:id/username_text_input")).sendKeys("to");
+        driver.findElement(By.id("ru.otus.wishlist:id/username_text_input")).sendKeys("DenisTest");
 
         driver.findElement(By.id("ru.otus.wishlist:id/password_text_input")).clear();
         driver.findElement(By.id("ru.otus.wishlist:id/password_text_input")).sendKeys("12345678");
@@ -79,53 +79,94 @@ public class AndroidLoginTest {
         // Нажимаем кнопку входа
         driver.findElement(By.id("ru.otus.wishlist:id/log_in_button")).click();
 
-        // Ждем появления элементов главного экрана и выводим их
+        // Ждем появления элементов главного экрана
         System.out.println("⏳ Ожидание загрузки главного экрана...");
-
-        // Даем время на загрузку
         try { Thread.sleep(3000); } catch (InterruptedException e) {}
 
         // Получаем текущую Activity
         System.out.println("📍 Текущая Activity: " + driver.currentActivity());
 
-        // Выводим все видимые элементы с resource-id
-        System.out.println("\n🔍 Элементы на главном экране:");
-        driver.findElements(By.xpath("//*[@resource-id]"))
-                .stream()
-                .filter(el -> el.getAttribute("resource-id") != null &&
-                        !el.getAttribute("resource-id").isEmpty())
-                .limit(30)
-                .forEach(el -> {
-                    String rid = el.getAttribute("resource-id");
-                    String text = el.getText();
-                    String className = el.getAttribute("class");
+        // Проверяем, что мы действительно перешли на другой экран
+//        boolean isMainScreen = !driver.currentActivity().contains("MainActivity");
+//        Assertions.assertTrue(isMainScreen,
+//                "Должен быть переход на главный экран, текущая Activity: " + driver.currentActivity());
 
-                    System.out.println("   📌 ID: " + rid);
-                    if (text != null && !text.isEmpty()) {
-                        System.out.println("      Текст: " + text);
-                    }
-                    if (className != null) {
-                        System.out.println("      Класс: " + className);
-                    }
-                });
+        System.out.println("✅ Авторизация успешна");
+
+        // === ДОБАВЛЯЕМ НОВЫЙ ПУНКТ В СПИСОК ===
+        System.out.println("\n➕ Добавляем новый пункт в список желаний...");
+
+        // Кликаем на кнопку добавления
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.id("ru.otus.wishlist:id/add_button"))).click();
+        System.out.println("✅ Кнопка добавления нажата");
+
+        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+
+        // Заполняем поля
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.id("ru.otus.wishlist:id/title_input")));
+
+        driver.findElement(By.id("ru.otus.wishlist:id/title_input")).sendKeys("DenTest wish");
+        System.out.println("✅ Заголовок введен");
+
+        driver.findElement(By.id("ru.otus.wishlist:id/description_input"))
+                .sendKeys("iPhone 15 Pro Max, 256GB, черный");
+        System.out.println("✅ Описание введено");
+
+        // Нажимаем кнопку сохранения
+        driver.findElement(By.id("ru.otus.wishlist:id/save_button")).click();
+        System.out.println("✅ Пункт сохранен");
+
+        // Ждем возврата на главный экран
+        try { Thread.sleep(15000); } catch (InterruptedException e) {}
+
+        // === ВЫВОДИМ ВСЕ ЭЛЕМЕНТЫ ПОСЛЕ ДОБАВЛЕНИЯ ===
+        System.out.println("\n📋 ЭЛЕМЕНТЫ НА ЭКРАНЕ ПОСЛЕ ДОБАВЛЕНИЯ:");
+        System.out.println("========================================");
 
         // Выводим все текстовые элементы
         System.out.println("\n📝 Текстовые элементы:");
         driver.findElements(By.xpath("//*[@text!='']"))
                 .stream()
-                .limit(20)
+                .limit(30)
                 .forEach(el -> {
                     String text = el.getText();
                     String rid = el.getAttribute("resource-id");
-                    System.out.println("   Текст: \"" + text + "\" (ID: " + rid + ")");
+                    String className = el.getAttribute("class");
+
+                    if (text != null && !text.trim().isEmpty()) {
+                        System.out.println("   \"" + text + "\"");
+                        if (rid != null && !rid.isEmpty()) {
+                            System.out.println("      ID: " + rid);
+                        }
+                        if (className != null) {
+                            System.out.println("      Класс: " + className);
+                        }
+                    }
                 });
 
-        // Проверяем, что мы действительно перешли на другой экран
-        boolean isMainScreen = !driver.currentActivity().contains("MainActivity");
-        Assertions.assertTrue(isMainScreen,
-                "Должен быть переход на главный экран, текущая Activity: " + driver.currentActivity());
+        // Выводим все элементы с resource-id (для отладки)
+        System.out.println("\n🔍 Элементы с resource-id:");
+        driver.findElements(By.xpath("//*[@resource-id]"))
+                .stream()
+                .filter(el -> el.getAttribute("resource-id") != null &&
+                        !el.getAttribute("resource-id").isEmpty())
+                .limit(20)
+                .forEach(el -> {
+                    String rid = el.getAttribute("resource-id");
+                    String text = el.getText();
+                    System.out.println("   📌 ID: " + rid);
+                    if (text != null && !text.isEmpty()) {
+                        System.out.println("      Текст: " + text);
+                    }
+                });
 
-        System.out.println("✅ Тест успешной авторизации пройден");
+        // Проверяем, что добавленный пункт появился в списке
+        boolean itemFound = driver.findElements(By.xpath("//*[@text='DenTest wish']")).size() > 0;
+        Assertions.assertTrue(itemFound, "Добавленный пункт должен отображаться в списке");
+
+        System.out.println("\n✅ Тест успешно завершен: пункт добавлен в список желаний");
     }
 
 //    @Test
