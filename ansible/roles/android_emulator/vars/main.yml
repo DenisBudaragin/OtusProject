@@ -34,7 +34,7 @@ redroid_opts: "androidboot.redroid_gpu_mode=guest androidboot.redroid_memfd=true
 test_app_name: "wishlist-349317-5fd795.apk"
 test_app_source: "{{ playbook_dir }}/files/{{ test_app_name }}"
 test_app_destination: "{{ android_apps_dir }}/{{ test_app_name }}"
-test_app_package: "com.your.app"
+test_app_package: "ru.otus.wishlist"
 
 # VNC Configuration (если используется)
 vnc_port: 6080
