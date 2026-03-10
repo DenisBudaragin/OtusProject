@@ -10,11 +10,11 @@ android_platform_version: "13"
 android_api_level: "33"
 android_device: "pixel_6"
 
-# Docker image - redroid (правильные теги для Ubuntu 24.04)
+# Docker image - redroid (для Ubuntu 24.04)
 android_emulator_image: "redroid/redroid"
 android_emulator_tag: "13.0.0-latest"  # используем простой тег
 
-# Альтернативные варианты (раскомментируйте нужный):
+# Альтернативные варианты:
 # android_emulator_tag: "latest"  # Android 14
 # android_emulator_tag: "12.0.0"  # Android 12
 # android_emulator_tag: "11.0.0"  # Android 11
