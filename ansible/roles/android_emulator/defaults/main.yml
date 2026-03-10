@@ -26,13 +26,13 @@ android_emulator_tag: "emulator_13.0"  # для Android 13
 emulator_ram: "4096"
 emulator_vm_heap: "512"
 emulator_disk_size: "8000M"
-emulator_gpu: "swiftshader_indirect"  # для совместимости
+emulator_gpu: "swiftshader_indirect"
 
 # Test app configuration
-test_app_name: "wishlist-349317-5fd795.apk"  # ваше приложение
+test_app_name: "wishlist-349317-5fd795.apk"
 test_app_source: "{{ playbook_dir }}/files/{{ test_app_name }}"
 test_app_destination: "{{ android_apps_dir }}/{{ test_app_name }}"
-#test_app_package: "com.your.app"  # замените на ваш package name
+#test_app_package: "ru.otus.wishlist"
 
 # Performance limits
 android_container_mem_limit: "4g"
