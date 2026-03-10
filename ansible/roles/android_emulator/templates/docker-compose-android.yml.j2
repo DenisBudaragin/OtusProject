@@ -7,27 +7,41 @@ services:
     networks:
       - {{ docker_network_name }}
     ports:
-      - "5555:5555"
+      - "5555:5555"  # ADB
+    environment:
+      - ANDROID_DEVICE={{ android_device }}
+      - REDROID_OPTS={{ redroid_opts }}
     volumes:
-      - {{ android_apps_dir }}:{{ android_apps_dir }}
-      - {{ android_results_dir }}:{{ android_results_dir }}
-      - {{ android_avd_dir }}:/data
-      - /dev/binderfs:/dev/binderfs:rw
+      - {{ android_apps_dir }}:/root/tmp
+      - {{ android_results_dir }}:/root/test-results
       - /dev/kvm:/dev/kvm
     devices:
       - /dev/kvm
-    environment:
-      - ANDROID_ADB_SERVER_PORT=5037
-      - TZ={{ timezone | default('Europe/Moscow') }}
-    command:
-      - "androidboot.redroid_gpu_mode={{ emulator_gpu | default('guest') }}"
-      - "androidboot.redroid_memfd=true"
-      - "androidboot.redroid_width=1080"
-      - "androidboot.redroid_height=1920"
-      - "androidboot.redroid_dpi=480"
-      - "androidboot.redroid_fps=30"
-    mem_limit: {{ android_container_mem_limit | default('4g') }}
+    mem_limit: {{ android_container_mem_limit | default('3g') }}
     cpus: "{{ android_container_cpu_limit | default('2') }}"
+
+  appium-server:
+    image: appium/appium:latest
+    container_name: appium-server
+    restart: unless-stopped
+    networks:
+      - {{ docker_network_name }}
+    ports:
+      - "{{ appium_port }}:{{ appium_port }}"
+    environment:
+      - APPIUM_PORT={{ appium_port }}
+    volumes:
+      - {{ android_apps_dir }}:/root/tmp
+      - {{ android_results_dir }}:/root/test-results
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: >
+      appium
+      --address 0.0.0.0
+      --port {{ appium_port }}
+      --allow-cors
+      --log /root/test-results/appium.log
+    depends_on:
+      - android-emulator
 
 networks:
   {{ docker_network_name }}:

@@ -6,34 +6,41 @@ android_apps_dir: "{{ android_base_dir }}/apps"
 android_results_dir: "{{ android_base_dir }}/test-results"
 android_config_dir: "{{ android_base_dir }}/config"
 android_avd_dir: "{{ android_base_dir }}/avd"
+android_logs_dir: "{{ android_base_dir }}/logs"
 
 # Appium Configuration
 appium_port: 4723
 appium_version: "2.5.1"
 
 # Android Emulator Configuration
-android_sdk_version: "11076708"  # Command line tools version
-android_platform_version: "34"    # Android 14
-android_api_level: "34"
+android_platform_version: "13"
+android_api_level: "33"
 android_abi: "google_apis/x86_64"
 android_device: "pixel_6"
+
+# Docker image - budtmo (включает Appium)
+android_emulator_image: "budtmo/docker-android"
+android_emulator_tag: "emulator_13.0"  # для Android 13
 
 # Emulator hardware config
 emulator_ram: "4096"
 emulator_vm_heap: "512"
 emulator_disk_size: "8000M"
-emulator_gpu: "auto"
+emulator_gpu: "swiftshader_indirect"  # для совместимости
 
 # Test app configuration
-test_app_name: "wishlist-349317-5fd795.apk"  # Имя вашего APK файла
-#test_app_source: "/local/path/to/{{ test_app_name }}"  # Локальный путь к APK
-test_app_source: "{{ playbook_dir }}/files/{{ test_app_name }}"  # Локальный путь к APK
+test_app_name: "wishlist-349317-5fd795.apk"  # ваше приложение
+test_app_source: "{{ playbook_dir }}/files/{{ test_app_name }}"
 test_app_destination: "{{ android_apps_dir }}/{{ test_app_name }}"
+#test_app_package: "com.your.app"  # замените на ваш package name
 
-# Test parameters
-test_timeout: "3600"  # 1 hour in seconds
-test_retries: 3
+# Performance limits
+android_container_mem_limit: "4g"
+android_container_cpu_limit: "2"
 
-# Docker image
-android_emulator_image: "budtmo/docker-android-x86-{{ android_platform_version }}"
-android_emulator_tag: "latest"
+# VNC Configuration
+vnc_port: 6080
+web_vnc: true
+
+# Network
+docker_network_name: "selenoid_network"

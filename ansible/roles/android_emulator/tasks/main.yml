@@ -42,28 +42,11 @@
     - android_enabled
     - not app_file.stat.exists
 
-- name: Ensure binder module is loaded
-  shell: |
-    # Загружаем модуль binder
-    modprobe binder_linux 2>/dev/null || true
-    
-    # Проверяем, загружен ли модуль
-    if lsmod | grep -q binder; then
-      echo "binder module loaded successfully"
-    
-      # Создаем binderfs если нужно
-      if [ ! -d /dev/binderfs ]; then
-        mkdir -p /dev/binderfs
-        mount -t binder none /dev/binderfs 2>/dev/null && echo "binderfs mounted" || echo "binderfs mount failed (not critical)"
-      fi
-    else
-      echo "Warning: binder module could not be loaded"
-    fi
-  args:
-    executable: /bin/bash
+- name: Ensure KVM permissions
+  file:
+    path: /dev/kvm
+    mode: "0666"
   when: android_enabled
-  changed_when: false
-  register: binder_check
 
 - name: Check if Docker image exists locally
   shell: "docker images -q {{ android_emulator_image }}:{{ android_emulator_tag }} 2>/dev/null"
@@ -71,7 +54,7 @@
   changed_when: false
   when: android_enabled
 
-- name: Pull Android emulator Docker image
+- name: Pull Android emulator Docker image (redroid)
   docker_image:
     name: "{{ android_emulator_image }}"
     tag: "{{ android_emulator_tag }}"
@@ -83,6 +66,13 @@
   retries: 3
   delay: 10
   until: pull_android_image is succeeded
+
+- name: Pull Appium Docker image
+  docker_image:
+    name: "appium/appium"
+    tag: "latest"
+    source: pull
+  when: android_enabled
 
 - name: Create docker-compose file for Android emulator
   template:
@@ -96,7 +86,6 @@
     cd {{ android_base_dir }} && docker compose down -v 2>/dev/null || docker-compose down -v 2>/dev/null || true
   ignore_errors: yes
   when: android_enabled
-  tags: restart_android
   changed_when: false
 
 - name: Start Android emulator stack
@@ -104,7 +93,6 @@
     cd {{ android_base_dir }} && docker compose up -d
   register: android_compose_result
   when: android_enabled
-  tags: restart_android
 
 - name: Wait for Android emulator to initialize
   pause:
@@ -117,39 +105,40 @@
   changed_when: false
   when: android_enabled
 
-- name: Check if Android emulator is running
-  shell: "docker inspect -f '{{ '{{' }}.State.Running{{ '}}' }}' android-emulator 2>/dev/null || echo 'false'"
-  register: android_running
-  changed_when: false
-  when: android_enabled
-
-- name: Wait for emulator to be ready (using host adb)
+- name: Wait for emulator to be fully ready and install app
   block:
     - name: Wait for ADB port to be open
       wait_for:
         host: "{{ inventory_hostname }}"
         port: 5555
-        delay: 10
-        timeout: 120
+        delay: 5
+        timeout: 180
       register: port_check
 
-    - name: Connect to emulator using host adb
+    - name: Connect ADB to emulator
       shell: |
         adb connect {{ inventory_hostname }}:5555
-        sleep 5
-        adb devices
-      register: adb_connect
+        sleep 3
       when: port_check is success
+      register: adb_connect
 
     - name: Wait for device to be fully booted
       shell: |
         adb -s {{ inventory_hostname }}:5555 wait-for-device
-        adb -s {{ inventory_hostname }}:5555 shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 5; done;'
+        adb -s {{ inventory_hostname }}:5555 shell 'while [[ -z $(getprop sys.boot_completed) ]]; do echo "Waiting for boot..." && sleep 5; done;'
       register: boot_wait
-      retries: 10
+      retries: 30
       delay: 10
       until: boot_wait is succeeded
       when: adb_connect is success
+
+    - name: Disable animations (for faster tests)
+      shell: |
+        adb -s {{ inventory_hostname }}:5555 shell settings put global window_animation_scale 0
+        adb -s {{ inventory_hostname }}:5555 shell settings put global transition_animation_scale 0
+        adb -s {{ inventory_hostname }}:5555 shell settings put global animator_duration_scale 0
+      when: boot_wait is succeeded
+      ignore_errors: yes
 
     - name: Install test app on emulator
       shell: |
@@ -160,10 +149,29 @@
       until: app_install is succeeded
       when: boot_wait is succeeded
 
+    - name: Verify Appium server is running
+      uri:
+        url: "http://{{ inventory_hostname }}:{{ appium_port }}/status"
+        method: GET
+        status_code: 200
+        timeout: 30
+      register: appium_status
+      retries: 15
+      delay: 5
+      until: appium_status is succeeded
+      when: boot_wait is succeeded
+
   when:
     - android_enabled
     - android_running.stdout | trim == "true"
-  ignore_errors: yes
+  rescue:
+    - name: Show emulator logs if ready check fails
+      shell: docker logs android-emulator --tail 50
+      register: emulator_logs
+      ignore_errors: yes
+
+    - debug:
+        msg: "Failed to wait for emulator. Logs: {{ emulator_logs.stdout if emulator_logs is defined else 'No logs' }}"
 
 - name: Display Android emulator info
   debug:
@@ -174,10 +182,10 @@
       - "   ADB connection: adb connect {{ inventory_hostname }}:5555"
       - "   Appium server: http://{{ inventory_hostname }}:{{ appium_port }}"
       - "   Test app: {{ test_app_name }}"
-      - "   App location: {{ test_app_destination }}"
       - "   Container status: {{ 'Running' if android_running.stdout | trim == 'true' else 'Not running' }}"
       - ""
       - "   📱 Commands to test:"
       - "      adb connect {{ inventory_hostname }}:5555"
       - "      adb shell"
-      - "      adb install {{ test_app_destination }}"
+      - "      curl http://{{ inventory_hostname }}:{{ appium_port }}/status"
+      - "      docker logs android-emulator"
