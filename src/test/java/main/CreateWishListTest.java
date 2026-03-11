@@ -1,5 +1,6 @@
 package main;
 
+//import helpers.DockerUtils;
 import io.appium.java_client.android.AndroidDriver;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
@@ -12,7 +13,7 @@ import java.time.Duration;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-public class AndroidLoginTest {
+public class CreateWishListTest {
     private AndroidDriver driver;
     private WebDriverWait wait;
     private WebDriverWait longWait;
@@ -26,8 +27,9 @@ public class AndroidLoginTest {
         capabilities.setCapability("appium:platformVersion", "13");
 
         // ВАЖНО: используем IP, который работает из контейнера Appium
-        capabilities.setCapability("appium:udid", "172.17.0.1:5555");
-
+//        String udid = DockerUtils.getRedroidUdid();
+//        capabilities.setCapability("appium:udid", "172.18.0.5:5555");
+//        capabilities.setCapability("appium:udid", udid);
         capabilities.setCapability("appium:deviceName", "redroid13");
         capabilities.setCapability("appium:automationName", "UiAutomator2");
 
@@ -60,7 +62,6 @@ public class AndroidLoginTest {
 
         System.out.println("✅ Сессия создана!");
         System.out.println("Session ID: " + driver.getSessionId());
-        System.out.println("UDID: 172.17.0.1:5555");
         System.out.println("⏱️ Таймауты: основное ожидание 30с, длинное 60с");
     }
 
@@ -129,7 +130,63 @@ public class AndroidLoginTest {
         // Проверяем, что добавленный пункт появился в списке
         boolean itemFound = driver.findElements(By.xpath("//*[@text='DenTest wish']")).size() > 0;
         Assertions.assertTrue(itemFound, "Добавленный пункт должен отображаться в списке");
+        System.out.println("✅ Добавленный пункт найден в списке");
 
-        System.out.println("\n✅ Тест успешно завершен: пункт добавлен в список желаний");
+        // === РЕДАКТИРУЕМ ДОБАВЛЕННЫЙ ПУНКТ ===
+        System.out.println("\n✏️ Редактируем добавленный пункт...");
+
+        // Генерируем случайное число для уникальности
+        String randomSuffix = String.valueOf(System.currentTimeMillis()).substring(7);
+        String editedTitle = "DenisTest wish edited " + randomSuffix;
+        System.out.println("Новый заголовок: " + editedTitle);
+
+        // Кликаем на кнопку редактирования второго элемента (так как первый добавленный)
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("(//android.widget.Button[@resource-id=\"ru.otus.wishlist:id/edit_button\"])[2]"))).click();
+        System.out.println("✅ Кнопка редактирования нажата");
+
+        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+
+        // Очищаем поле заголовка и вводим новый текст
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.id("ru.otus.wishlist:id/title_input")));
+
+        driver.findElement(By.id("ru.otus.wishlist:id/title_input")).clear();
+        driver.findElement(By.id("ru.otus.wishlist:id/title_input")).sendKeys(editedTitle);
+        System.out.println("✅ Заголовок обновлен");
+
+        // Нажимаем кнопку сохранения
+        driver.findElement(By.id("ru.otus.wishlist:id/save_button")).click();
+        System.out.println("✅ Изменения сохранены");
+
+        // Ждем возврата на главный экран
+        try { Thread.sleep(3000); } catch (InterruptedException e) {}
+
+        // Проверяем, что изменения применились
+        System.out.println("\n🔍 Проверка примененных изменений:");
+
+        // Ищем элемент с новым заголовком
+        boolean editedItemFound = driver.findElements(By.xpath("//*[@text='" + editedTitle + "']")).size() > 0;
+        Assertions.assertTrue(editedItemFound, "Отредактированный пункт должен отображаться с новым заголовком");
+
+        // Проверяем, что старый заголовок больше не отображается
+        boolean oldItemFound = driver.findElements(By.xpath("//*[@text='DenTest wish']")).size() > 0;
+        if (oldItemFound) {
+            System.out.println("⚠️ Внимание: старый заголовок все еще отображается");
+        } else {
+            System.out.println("✅ Старый заголовок больше не отображается");
+        }
+
+        // Выводим все элементы списка для наглядности
+        System.out.println("\n📋 Текущие элементы в списке:");
+        driver.findElements(By.xpath("//*[@resource-id='ru.otus.wishlist:id/title_text']"))
+                .forEach(el -> {
+                    String text = el.getText();
+                    if (text != null && !text.isEmpty()) {
+                        System.out.println("   • " + text);
+                    }
+                });
+
+        System.out.println("\n✅ Тест успешно завершен: пункт добавлен и отредактирован");
     }
 }
