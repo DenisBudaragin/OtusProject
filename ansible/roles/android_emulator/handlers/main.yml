@@ -61,3 +61,27 @@
       - "🔄 Android Emulator handler triggered: {{ handler_name }}"
       - "Time: {{ ansible_date_time.iso8601 }}"
       - "Status: {{ restart_result is defined and restart_result is succeeded }}"
+
+# Новые хендлеры для ADB
+- name: check adb connection
+  shell: |
+    docker exec appium-server adb devices | grep android-emulator:5555 | grep device
+  register: adb_check
+  ignore_errors: yes
+  changed_when: false
+
+- name: reconnect adb if offline
+  shell: |
+    docker exec appium-server adb disconnect android-emulator:5555
+    sleep 2
+    docker exec appium-server adb connect android-emulator:5555
+    sleep 2
+    docker exec appium-server adb devices
+  when: adb_check is failed or (adb_check.stdout is defined and 'offline' in adb_check.stdout)
+  register: reconnect_result
+
+- name: notify adb status
+  debug:
+    msg:
+      - "🔌 ADB Connection Status:"
+      - "{% if adb_check is succeeded and 'device' in adb_check.stdout %}✅ Connected (device){% elif adb_check is succeeded and 'offline' in adb_check.stdout %}⚠️ Offline - reconnecting...{% else %}❌ Not connected{% endif %}"

@@ -1,7 +1,9 @@
 ---
-- name: Install ADB on host for debugging
+- name: Install ADB tools on host for debugging
   apt:
-    name: adb
+    name:
+      - adb
+      - android-tools-adb
     state: present
     update_cache: yes
   when:
@@ -96,7 +98,7 @@
 
 - name: Wait for Android emulator to initialize
   pause:
-    seconds: 30
+    seconds: 60
   when: android_enabled
 
 - name: Check if Android emulator is running
@@ -105,9 +107,45 @@
   changed_when: false
   when: android_enabled
 
+- name: Check and fix ADB connection
+  block:
+    - name: Wait for ADB connection from Appium container
+      shell: |
+        docker exec appium-server adb connect android-emulator:5555
+      register: adb_first_connect
+      retries: 5
+      delay: 10
+      until: adb_first_connect is succeeded or ('connected' in adb_first_connect.stdout or 'already connected' in adb_first_connect.stdout)
+
+    - name: Verify device status
+      shell: |
+        docker exec appium-server adb devices | grep android-emulator:5555
+      register: device_status
+      retries: 10
+      delay: 5
+      until: device_status is succeeded and 'device' in device_status.stdout
+
+    - name: Show ADB status
+      debug:
+        msg: "✅ ADB connected: {{ device_status.stdout }}"
+
+  when: android_enabled
+  rescue:
+    - name: Show ADB debug info if connection fails
+      shell: |
+        echo "=== ADB Debug Info ==="
+        docker exec appium-server adb devices
+        docker exec appium-server ping -c 2 android-emulator || echo "Ping failed"
+        docker inspect android-emulator | grep -A 5 "Networks"
+      register: adb_debug
+      ignore_errors: yes
+
+    - debug:
+        var: adb_debug.stdout_lines
+
 - name: Wait for emulator to be fully ready and install app
   block:
-    - name: Wait for ADB port to be open
+    - name: Wait for ADB port to be open on host
       wait_for:
         host: "{{ inventory_hostname }}"
         port: 5555
@@ -115,12 +153,28 @@
         timeout: 180
       register: port_check
 
-    - name: Connect ADB to emulator
+    - name: Connect ADB to emulator from host
       shell: |
         adb connect {{ inventory_hostname }}:5555
         sleep 3
       when: port_check is success
       register: adb_connect
+
+    - name: Check ADB from Appium container again
+      shell: |
+        docker exec appium-server adb devices
+      register: container_adb
+      when: adb_connect is success
+
+    - name: Fix ADB if needed in container
+      shell: |
+        docker exec appium-server adb disconnect android-emulator:5555
+        docker exec appium-server adb connect android-emulator:5555
+        sleep 3
+      when:
+        - container_adb is defined
+        - container_adb.stdout is not search('device')
+      register: adb_fix
 
     - name: Wait for device to be fully booted
       shell: |
@@ -180,6 +234,7 @@
       - "   Emulator: Android {{ android_platform_version }} (API {{ android_api_level }})"
       - "   Device: {{ android_device }}"
       - "   ADB connection: adb connect {{ inventory_hostname }}:5555"
+      - "   ADB in container: docker exec appium-server adb connect android-emulator:5555"
       - "   Appium server: http://{{ inventory_hostname }}:{{ appium_port }}"
       - "   Test app: {{ test_app_name }}"
       - "   Container status: {{ 'Running' if android_running.stdout | trim == 'true' else 'Not running' }}"
@@ -188,4 +243,5 @@
       - "      adb connect {{ inventory_hostname }}:5555"
       - "      adb shell"
       - "      curl http://{{ inventory_hostname }}:{{ appium_port }}/status"
+      - "      docker exec appium-server adb devices"
       - "      docker logs android-emulator"

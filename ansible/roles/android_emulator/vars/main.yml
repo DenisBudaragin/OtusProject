@@ -27,8 +27,8 @@ emulator_gpu: "swiftshader_indirect"
 android_container_mem_limit: "3g"
 android_container_cpu_limit: "2"
 
-# Redroid specific options для Ubuntu 24.04
-redroid_opts: "androidboot.redroid_gpu_mode=guest androidboot.redroid_memfd=true androidboot.redroid_width=1080 androidboot.redroid_height=1920 androidboot.redroid_dpi=480"
+# Redroid specific options для Ubuntu 24.04 с отключением ADB авторизации
+redroid_opts: "androidboot.redroid_gpu_mode=guest androidboot.redroid_memfd=true androidboot.redroid_width=1080 androidboot.redroid_height=1920 androidboot.redroid_dpi=480 ro.adb.secure=0 persist.adb.secure=0 service.adb.tcp.port=5555"
 
 # Test app configuration
 test_app_name: "wishlist-349317-5fd795.apk"

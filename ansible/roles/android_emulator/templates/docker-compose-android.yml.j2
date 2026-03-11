@@ -11,6 +11,17 @@ services:
     environment:
       - ANDROID_DEVICE={{ android_device }}
       - REDROID_OPTS={{ redroid_opts }}
+    # Добавляем command с параметрами ядра для отключения ADB авторизации
+    command: >
+      androidboot.hardware=redroid
+      androidboot.redroid_gpu_mode=guest
+      androidboot.redroid_memfd=true
+      androidboot.redroid_width=1080
+      androidboot.redroid_height=1920
+      androidboot.redroid_dpi=480
+      ro.adb.secure=0
+      persist.adb.secure=0
+      service.adb.tcp.port=5555
     volumes:
       - {{ android_apps_dir }}:/root/tmp
       - {{ android_results_dir }}:/root/test-results
@@ -25,21 +36,17 @@ services:
     container_name: appium-server
     restart: unless-stopped
     networks:
-      - {{ docker_network_name }}
+      - selenoid_network
     ports:
-      - "{{ appium_port }}:{{ appium_port }}"
+      - "4723:4723"
     environment:
-      - APPIUM_PORT={{ appium_port }}
+      - APPIUM_PORT=4723
     volumes:
-      - {{ android_apps_dir }}:/root/tmp
-      - {{ android_results_dir }}:/root/test-results
+      - /opt/android-emulator/apps:/root/tmp
+      - /opt/android-emulator/test-results:/root/test-results
       - /var/run/docker.sock:/var/run/docker.sock
-    command: >
-      appium
-      --address 0.0.0.0
-      --port {{ appium_port }}
-      --allow-cors
-      --log /root/test-results/appium.log
+    # Упрощенная команда без sh -c
+    command: appium --address 0.0.0.0 --port 4723 --allow-cors
     depends_on:
       - android-emulator
 
