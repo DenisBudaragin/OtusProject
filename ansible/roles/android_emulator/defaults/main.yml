@@ -20,7 +20,7 @@ android_device: "pixel_6"
 
 # Docker image - budtmo (включает Appium)
 android_emulator_image: "budtmo/docker-android"
-android_emulator_tag: "emulator_13.0"  # для Android 13
+android_emulator_tag: "emulator_13.0"
 
 # Emulator hardware config
 emulator_ram: "4096"

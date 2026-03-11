@@ -12,7 +12,7 @@ android_device: "pixel_6"
 
 # Docker image - redroid (для Ubuntu 24.04)
 android_emulator_image: "redroid/redroid"
-android_emulator_tag: "13.0.0-latest"  # используем простой тег
+android_emulator_tag: "13.0.0-latest"
 
 # Альтернативные варианты:
 # android_emulator_tag: "latest"  # Android 14
@@ -36,7 +36,7 @@ test_app_source: "{{ playbook_dir }}/files/{{ test_app_name }}"
 test_app_destination: "{{ android_apps_dir }}/{{ test_app_name }}"
 test_app_package: "ru.otus.wishlist"
 
-# VNC Configuration (если используется)
+# VNC Configuration
 vnc_port: 6080
 
 # Network
