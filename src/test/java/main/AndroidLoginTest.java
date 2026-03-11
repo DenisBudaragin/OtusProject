@@ -1,6 +1,6 @@
 package main;
 
-import io.appium.java_client.android.AndroidDriver; // ИЗМЕНЕНО: конкретный тип
+import io.appium.java_client.android.AndroidDriver;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -13,7 +13,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class AndroidLoginTest {
-    private AndroidDriver driver; // ИЗМЕНЕНО: с AppiumDriver на AndroidDriver
+    private AndroidDriver driver;
     private WebDriverWait wait;
     private WebDriverWait longWait;
 
@@ -24,12 +24,21 @@ public class AndroidLoginTest {
         // Основные capabilities
         capabilities.setCapability("platformName", "Android");
         capabilities.setCapability("appium:platformVersion", "13");
-        capabilities.setCapability("appium:deviceName", "redroid13_x86_64");
+
+        // ВАЖНО: используем IP, который работает из контейнера Appium
+        capabilities.setCapability("appium:udid", "172.17.0.1:5555");
+
+        capabilities.setCapability("appium:deviceName", "redroid13");
         capabilities.setCapability("appium:automationName", "UiAutomator2");
 
         // Настройки приложения
         capabilities.setCapability("appium:appPackage", "ru.otus.wishlist");
         capabilities.setCapability("appium:appActivity", "ru.otus.wishlist.MainActivity");
+
+        // Важно для уже установленного приложения
+        capabilities.setCapability("appium:noReset", true);
+        capabilities.setCapability("appium:fullReset", false);
+
         capabilities.setCapability("appium:appWaitForLaunch", true);
         capabilities.setCapability("appium:appWaitDuration", 60000);
 
@@ -51,6 +60,7 @@ public class AndroidLoginTest {
 
         System.out.println("✅ Сессия создана!");
         System.out.println("Session ID: " + driver.getSessionId());
+        System.out.println("UDID: 172.17.0.1:5555");
         System.out.println("⏱️ Таймауты: основное ожидание 30с, длинное 60с");
     }
 
@@ -86,11 +96,6 @@ public class AndroidLoginTest {
         // Получаем текущую Activity
         System.out.println("📍 Текущая Activity: " + driver.currentActivity());
 
-        // Проверяем, что мы действительно перешли на другой экран
-//        boolean isMainScreen = !driver.currentActivity().contains("MainActivity");
-//        Assertions.assertTrue(isMainScreen,
-//                "Должен быть переход на главный экран, текущая Activity: " + driver.currentActivity());
-
         System.out.println("✅ Авторизация успешна");
 
         // === ДОБАВЛЯЕМ НОВЫЙ ПУНКТ В СПИСОК ===
@@ -119,48 +124,7 @@ public class AndroidLoginTest {
         System.out.println("✅ Пункт сохранен");
 
         // Ждем возврата на главный экран
-        try { Thread.sleep(15000); } catch (InterruptedException e) {}
-
-        // === ВЫВОДИМ ВСЕ ЭЛЕМЕНТЫ ПОСЛЕ ДОБАВЛЕНИЯ ===
-        System.out.println("\n📋 ЭЛЕМЕНТЫ НА ЭКРАНЕ ПОСЛЕ ДОБАВЛЕНИЯ:");
-        System.out.println("========================================");
-
-        // Выводим все текстовые элементы
-        System.out.println("\n📝 Текстовые элементы:");
-        driver.findElements(By.xpath("//*[@text!='']"))
-                .stream()
-                .limit(30)
-                .forEach(el -> {
-                    String text = el.getText();
-                    String rid = el.getAttribute("resource-id");
-                    String className = el.getAttribute("class");
-
-                    if (text != null && !text.trim().isEmpty()) {
-                        System.out.println("   \"" + text + "\"");
-                        if (rid != null && !rid.isEmpty()) {
-                            System.out.println("      ID: " + rid);
-                        }
-                        if (className != null) {
-                            System.out.println("      Класс: " + className);
-                        }
-                    }
-                });
-
-        // Выводим все элементы с resource-id (для отладки)
-        System.out.println("\n🔍 Элементы с resource-id:");
-        driver.findElements(By.xpath("//*[@resource-id]"))
-                .stream()
-                .filter(el -> el.getAttribute("resource-id") != null &&
-                        !el.getAttribute("resource-id").isEmpty())
-                .limit(20)
-                .forEach(el -> {
-                    String rid = el.getAttribute("resource-id");
-                    String text = el.getText();
-                    System.out.println("   📌 ID: " + rid);
-                    if (text != null && !text.isEmpty()) {
-                        System.out.println("      Текст: " + text);
-                    }
-                });
+        try { Thread.sleep(5000); } catch (InterruptedException e) {}
 
         // Проверяем, что добавленный пункт появился в списке
         boolean itemFound = driver.findElements(By.xpath("//*[@text='DenTest wish']")).size() > 0;
@@ -168,70 +132,4 @@ public class AndroidLoginTest {
 
         System.out.println("\n✅ Тест успешно завершен: пункт добавлен в список желаний");
     }
-
-//    @Test
-//    @DisplayName("Тест авторизации с пустыми полями")
-//    public void testLoginWithEmptyFields() {
-//        // Ждем поля ввода
-//        wait.until(ExpectedConditions.presenceOfElementLocated(
-//                By.id("ru.otus.wishlist:id/username_text_input")));
-//
-//        // Оставляем поля пустыми и нажимаем кнопку
-//        driver.findElement(By.id("ru.otus.wishlist:id/username_text_input")).clear();
-//        driver.findElement(By.id("ru.otus.wishlist:id/password_text_input")).clear();
-//        driver.findElement(By.id("ru.otus.wishlist:id/log_in_button")).click();
-//
-//        // Ждем сообщение об ошибке (замените ID на актуальный)
-//        wait.until(ExpectedConditions.presenceOfElementLocated(
-//                By.id("\t\n" +
-//                        "ru.otus.wishlist:id/alertTitle")));
-//
-//        System.out.println("✅ Тест пройден: сообщение об ошибке появилось");
-//    }
-//
-//    @Test
-//    @DisplayName("Диагностика приложения")
-//    public void diagnosticTest() {
-//        try {
-//            Thread.sleep(5000);
-//
-//            // ТЕПЕРЬ ЭТИ МЕТОДЫ РАБОТАЮТ
-//            System.out.println("📍 Текущая Activity: " + driver.currentActivity());
-//            System.out.println("📦 Текущий Package: " + driver.getCurrentPackage());
-//
-//            longWait.until(ExpectedConditions.presenceOfElementLocated(
-//                    By.xpath("//*[@resource-id]")));
-//
-//            System.out.println("🔍 Найденные resource-id на экране:");
-//            driver.findElements(By.xpath("//*[@resource-id]"))
-//                    .stream()
-//                    .limit(20)
-//                    .forEach(el -> {
-//                        String rid = el.getAttribute("resource-id");
-//                        if (rid != null && !rid.isEmpty()) {
-//                            System.out.println("   - " + rid);
-//                        }
-//                    });
-//
-//            // ДОБАВЛЕНО: Поиск текстовых полей
-//            System.out.println("\n🔍 Поиск текстовых полей:");
-//            driver.findElements(By.xpath("//*[@class='android.widget.EditText']"))
-//                    .forEach(el -> {
-//                        System.out.println("   Поле ввода: " + el.getAttribute("resource-id"));
-//                    });
-//
-//            // ДОБАВЛЕНО: Поиск кнопок
-//            System.out.println("\n🔍 Поиск кнопок:");
-//            driver.findElements(By.xpath("//*[@class='android.widget.Button']"))
-//                    .forEach(el -> {
-//                        System.out.println("   Кнопка: " + el.getAttribute("resource-id") +
-//                                ", текст: " + el.getText());
-//                    });
-//
-//            System.out.println("✅ Диагностика завершена");
-//
-//        } catch (Exception e) {
-//            System.err.println("❌ Ошибка диагностики: " + e.getMessage());
-//        }
-//    }
 }
