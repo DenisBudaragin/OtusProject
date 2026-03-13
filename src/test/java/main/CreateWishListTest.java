@@ -1,6 +1,5 @@
 package main;
 
-//import helpers.DockerUtils;
 import io.appium.java_client.android.AndroidDriver;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
@@ -25,11 +24,6 @@ public class CreateWishListTest {
         // Основные capabilities
         capabilities.setCapability("platformName", "Android");
         capabilities.setCapability("appium:platformVersion", "13");
-
-        // ВАЖНО: используем IP, который работает из контейнера Appium
-//        String udid = DockerUtils.getRedroidUdid();
-//        capabilities.setCapability("appium:udid", "172.18.0.5:5555");
-//        capabilities.setCapability("appium:udid", udid);
         capabilities.setCapability("appium:deviceName", "redroid13");
         capabilities.setCapability("appium:automationName", "UiAutomator2");
 
@@ -74,119 +68,183 @@ public class CreateWishListTest {
     }
 
     @Test
-    @DisplayName("Тест успешной авторизации")
+    @DisplayName("Тест успешной авторизации, создания и редактирования списка желаний")
     public void testSuccessfulLogin() {
-        // Ждем поля ввода
-        wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.id("ru.otus.wishlist:id/username_text_input")));
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("🔄 ТЕСТ: СОЗДАНИЕ И РЕДАКТИРОВАНИЕ СПИСКА ЖЕЛАНИЙ");
+        System.out.println("=".repeat(60));
 
-        // Очищаем поля и вводим данные
-        driver.findElement(By.id("ru.otus.wishlist:id/username_text_input")).clear();
-        driver.findElement(By.id("ru.otus.wishlist:id/username_text_input")).sendKeys("DenisTest");
+        try {
+            // Ждем поля ввода
+            wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.id("ru.otus.wishlist:id/username_text_input")));
 
-        driver.findElement(By.id("ru.otus.wishlist:id/password_text_input")).clear();
-        driver.findElement(By.id("ru.otus.wishlist:id/password_text_input")).sendKeys("12345678");
+            // Очищаем поля и вводим данные
+            driver.findElement(By.id("ru.otus.wishlist:id/username_text_input")).clear();
+            driver.findElement(By.id("ru.otus.wishlist:id/username_text_input")).sendKeys("DenisTest");
 
-        // Нажимаем кнопку входа
-        driver.findElement(By.id("ru.otus.wishlist:id/log_in_button")).click();
+            driver.findElement(By.id("ru.otus.wishlist:id/password_text_input")).clear();
+            driver.findElement(By.id("ru.otus.wishlist:id/password_text_input")).sendKeys("12345678");
 
-        // Ждем появления элементов главного экрана
-        System.out.println("⏳ Ожидание загрузки главного экрана...");
-        try { Thread.sleep(3000); } catch (InterruptedException e) {}
+            // Нажимаем кнопку входа
+            driver.findElement(By.id("ru.otus.wishlist:id/log_in_button")).click();
 
-        // Получаем текущую Activity
-        System.out.println("📍 Текущая Activity: " + driver.currentActivity());
+            // Ждем появления элементов главного экрана
+            System.out.println("⏳ Ожидание загрузки главного экрана...");
+            try { Thread.sleep(3000); } catch (InterruptedException e) {}
 
-        System.out.println("✅ Авторизация успешна");
+            // Получаем текущую Activity
+            System.out.println("📍 Текущая Activity: " + driver.currentActivity());
 
-        // === ДОБАВЛЯЕМ НОВЫЙ ПУНКТ В СПИСОК ===
-        System.out.println("\n➕ Добавляем новый пункт в список желаний...");
+            System.out.println("✅ Авторизация успешна");
 
-        // Кликаем на кнопку добавления
-        wait.until(ExpectedConditions.elementToBeClickable(
-                By.id("ru.otus.wishlist:id/add_button"))).click();
-        System.out.println("✅ Кнопка добавления нажата");
+            // === ДОБАВЛЯЕМ НОВЫЙ ПУНКТ В СПИСОК ===
+            System.out.println("\n➕ Добавляем новый пункт в список желаний...");
 
-        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+            // Кликаем на кнопку добавления
+            wait.until(ExpectedConditions.elementToBeClickable(
+                    By.id("ru.otus.wishlist:id/add_button"))).click();
+            System.out.println("✅ Кнопка добавления нажата");
 
-        // Заполняем поля
-        wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.id("ru.otus.wishlist:id/title_input")));
+            try { Thread.sleep(1000); } catch (InterruptedException e) {}
 
-        driver.findElement(By.id("ru.otus.wishlist:id/title_input")).sendKeys("DenTest wish");
-        System.out.println("✅ Заголовок введен");
+            // Заполняем поля
+            wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.id("ru.otus.wishlist:id/title_input")));
 
-        driver.findElement(By.id("ru.otus.wishlist:id/description_input"))
-                .sendKeys("iPhone 15 Pro Max, 256GB, черный");
-        System.out.println("✅ Описание введено");
+            driver.findElement(By.id("ru.otus.wishlist:id/title_input")).sendKeys("DenTest wish");
+            System.out.println("✅ Заголовок введен");
 
-        // Нажимаем кнопку сохранения
-        driver.findElement(By.id("ru.otus.wishlist:id/save_button")).click();
-        System.out.println("✅ Пункт сохранен");
+            driver.findElement(By.id("ru.otus.wishlist:id/description_input"))
+                    .sendKeys("iPhone 15 Pro Max, 256GB, черный");
+            System.out.println("✅ Описание введено");
 
-        // Ждем возврата на главный экран
-        try { Thread.sleep(5000); } catch (InterruptedException e) {}
+            // Нажимаем кнопку сохранения
+            driver.findElement(By.id("ru.otus.wishlist:id/save_button")).click();
+            System.out.println("✅ Пункт сохранен");
 
-        // Проверяем, что добавленный пункт появился в списке
-        boolean itemFound = driver.findElements(By.xpath("//*[@text='DenTest wish']")).size() > 0;
-        Assertions.assertTrue(itemFound, "Добавленный пункт должен отображаться в списке");
-        System.out.println("✅ Добавленный пункт найден в списке");
+            // Ждем возврата на главный экран
+            try { Thread.sleep(3000); } catch (InterruptedException e) {}
 
-        // === РЕДАКТИРУЕМ ДОБАВЛЕННЫЙ ПУНКТ ===
-        System.out.println("\n✏️ Редактируем добавленный пункт...");
+            // Проверяем, что добавленный пункт появился в списке
+            boolean itemFound = driver.findElements(By.xpath("//*[@text='DenTest wish']")).size() > 0;
+            Assertions.assertTrue(itemFound, "Добавленный пункт должен отображаться в списке");
+            System.out.println("✅ Добавленный пункт найден в списке");
 
-        // Генерируем случайное число для уникальности
-        String randomSuffix = String.valueOf(System.currentTimeMillis()).substring(7);
-        String editedTitle = "DenisTest wish edited " + randomSuffix;
-        System.out.println("Новый заголовок: " + editedTitle);
+            // === РЕДАКТИРУЕМ ДОБАВЛЕННЫЙ ПУНКТ ===
+            System.out.println("\n✏️ Редактируем добавленный пункт...");
 
-        // Кликаем на кнопку редактирования второго элемента (так как первый добавленный)
-        wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("(//android.widget.Button[@resource-id=\"ru.otus.wishlist:id/edit_button\"])[2]"))).click();
-        System.out.println("✅ Кнопка редактирования нажата");
+            // Генерируем случайное число для уникальности
+            String randomSuffix = String.valueOf(System.currentTimeMillis()).substring(7);
+            String editedTitle = "DenisTest wish edited " + randomSuffix;
+            System.out.println("Новый заголовок: " + editedTitle);
 
-        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+            // Кликаем на кнопку редактирования второго элемента (так как первый добавленный)
+            wait.until(ExpectedConditions.elementToBeClickable(
+                    By.xpath("(//android.widget.Button[@resource-id=\"ru.otus.wishlist:id/edit_button\"])[2]"))).click();
+            System.out.println("✅ Кнопка редактирования нажата");
 
-        // Очищаем поле заголовка и вводим новый текст
-        wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.id("ru.otus.wishlist:id/title_input")));
+            try { Thread.sleep(1000); } catch (InterruptedException e) {}
 
-        driver.findElement(By.id("ru.otus.wishlist:id/title_input")).clear();
-        driver.findElement(By.id("ru.otus.wishlist:id/title_input")).sendKeys(editedTitle);
-        System.out.println("✅ Заголовок обновлен");
+            // Очищаем поле заголовка и вводим новый текст
+            wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.id("ru.otus.wishlist:id/title_input")));
 
-        // Нажимаем кнопку сохранения
-        driver.findElement(By.id("ru.otus.wishlist:id/save_button")).click();
-        System.out.println("✅ Изменения сохранены");
+            driver.findElement(By.id("ru.otus.wishlist:id/title_input")).clear();
+            driver.findElement(By.id("ru.otus.wishlist:id/title_input")).sendKeys(editedTitle);
+            System.out.println("✅ Заголовок обновлен");
 
-        // Ждем возврата на главный экран
-        try { Thread.sleep(3000); } catch (InterruptedException e) {}
+            // Нажимаем кнопку сохранения
+            driver.findElement(By.id("ru.otus.wishlist:id/save_button")).click();
+            System.out.println("✅ Изменения сохранены");
 
-        // Проверяем, что изменения применились
-        System.out.println("\n🔍 Проверка примененных изменений:");
+            // Ждем возврата на главный экран
+            try { Thread.sleep(3000); } catch (InterruptedException e) {}
 
-        // Ищем элемент с новым заголовком
-        boolean editedItemFound = driver.findElements(By.xpath("//*[@text='" + editedTitle + "']")).size() > 0;
-        Assertions.assertTrue(editedItemFound, "Отредактированный пункт должен отображаться с новым заголовком");
+            // Проверяем, что изменения применились
+            System.out.println("\n🔍 Проверка примененных изменений:");
 
-        // Проверяем, что старый заголовок больше не отображается
-        boolean oldItemFound = driver.findElements(By.xpath("//*[@text='DenTest wish']")).size() > 0;
-        if (oldItemFound) {
-            System.out.println("⚠️ Внимание: старый заголовок все еще отображается");
-        } else {
-            System.out.println("✅ Старый заголовок больше не отображается");
-        }
+            // Ищем элемент с новым заголовком
+            boolean editedItemFound = driver.findElements(By.xpath("//*[@text='" + editedTitle + "']")).size() > 0;
+            Assertions.assertTrue(editedItemFound, "Отредактированный пункт должен отображаться с новым заголовком");
 
-        // Выводим все элементы списка для наглядности
-        System.out.println("\n📋 Текущие элементы в списке:");
-        driver.findElements(By.xpath("//*[@resource-id='ru.otus.wishlist:id/title_text']"))
-                .forEach(el -> {
-                    String text = el.getText();
-                    if (text != null && !text.isEmpty()) {
-                        System.out.println("   • " + text);
+            // Проверяем, что старый заголовок больше не отображается
+            boolean oldItemFound = driver.findElements(By.xpath("//*[@text='DenTest wish']")).size() > 0;
+            if (oldItemFound) {
+                System.out.println("⚠️ Внимание: старый заголовок все еще отображается");
+            } else {
+                System.out.println("✅ Старый заголовок больше не отображается");
+            }
+
+            // Выводим все элементы списка для наглядности
+            System.out.println("\n📋 Текущие элементы в списке:");
+            driver.findElements(By.xpath("//*[@resource-id='ru.otus.wishlist:id/title_text']"))
+                    .forEach(el -> {
+                        String text = el.getText();
+                        if (text != null && !text.isEmpty()) {
+                            System.out.println("   • " + text);
+                        }
+                    });
+
+            System.out.println("\n✅ Тест успешно завершен: пункт добавлен и отредактирован");
+
+            // === ШАГ: ВЫХОД ИЗ АККАУНТА ===
+            System.out.println("\n🚪 Выход из аккаунта...");
+
+            // Навигация на вкладку профиля (третья вкладка)
+            try {
+                By profileTabLocator = By.xpath("(//android.widget.ImageView[@resource-id=\"ru.otus.wishlist:id/navigation_bar_item_icon_view\"])[3]");
+                wait.until(ExpectedConditions.elementToBeClickable(profileTabLocator)).click();
+                System.out.println("✅ Перешли на вкладку профиля");
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                System.out.println("⚠️ Не удалось перейти на вкладку профиля через XPath, пробуем альтернативный способ");
+                try {
+                    By profileTabLocatorAlt = By.xpath("//android.widget.FrameLayout[@content-desc=\"Profile\"]");
+                    wait.until(ExpectedConditions.elementToBeClickable(profileTabLocatorAlt)).click();
+                    System.out.println("✅ Перешли на вкладку профиля (альтернативный способ)");
+                    Thread.sleep(1000);
+                } catch (Exception e2) {
+                    System.out.println("⚠️ Не удалось найти вкладку профиля");
+                }
+            }
+
+            // Находим и нажимаем кнопку выхода
+            try {
+                By logoutButtonLocator = By.id("ru.otus.wishlist:id/log_out_button");
+                wait.until(ExpectedConditions.elementToBeClickable(logoutButtonLocator)).click();
+                System.out.println("✅ Кнопка выхода нажата");
+                Thread.sleep(1000);
+
+                // Подтверждение выхода, если появляется диалоговое окно
+                try {
+                    By confirmLogoutLocator = By.id("android:id/button1"); // Стандартная кнопка "ОК"
+                    if (driver.findElements(confirmLogoutLocator).size() > 0) {
+                        driver.findElement(confirmLogoutLocator).click();
+                        System.out.println("✅ Подтвержден выход из аккаунта");
+                        Thread.sleep(1000);
                     }
-                });
+                } catch (Exception e) {
+                    System.out.println("ℹ️ Диалог подтверждения не появился");
+                }
 
-        System.out.println("\n✅ Тест успешно завершен: пункт добавлен и отредактирован");
+                // Проверяем, что произошел выход (появилась форма авторизации)
+                wait.until(ExpectedConditions.presenceOfElementLocated(
+                        By.id("ru.otus.wishlist:id/username_text_input")));
+                System.out.println("✅ Выход из аккаунта выполнен успешно");
+
+            } catch (Exception e) {
+                System.out.println("⚠️ Не удалось выполнить выход из аккаунта: " + e.getMessage());
+            }
+
+            System.out.println("\n" + "=".repeat(60));
+            System.out.println("🏁 ТЕСТ ПОЛНОСТЬЮ ЗАВЕРШЕН");
+            System.out.println("=".repeat(60));
+
+        } catch (Exception e) {
+            System.err.println("\n❌ Ошибка в тесте: " + e.getMessage());
+            e.printStackTrace();
+            Assertions.fail("Тест завершился с ошибкой: " + e.getMessage());
+        }
     }
 }
