@@ -15,7 +15,6 @@ public class MainPage extends BasePage {
 
     public void waitForMainScreen() {
         wait.forElementToBeClickable(ADD_BUTTON);
-//        AllureHelper.attachScreenshot(driver, "Main screen loaded");
     }
 
     public void clickAddButton() {
@@ -27,7 +26,6 @@ public class MainPage extends BasePage {
         AllureHelper.step("Opening wish list: " + wishListName);
         By wishListLocator = By.xpath("//android.widget.TextView[@resource-id='ru.otus.wishlist:id/title' and @text='" + wishListName + "']");
         wait.forElementToBeClickable(wishListLocator).click();
-//        AllureHelper.attachScreenshot(driver, "Wish list opened");
         return new WishListPage(driver);
     }
 
@@ -35,7 +33,6 @@ public class MainPage extends BasePage {
         AllureHelper.step("Opening first wish list");
         By firstWishListLocator = By.xpath("(//android.widget.TextView[@resource-id='ru.otus.wishlist:id/title'])[1]");
         wait.forElementToBeClickable(firstWishListLocator).click();
-//        AllureHelper.attachScreenshot(driver, "First wish list opened");
         return new WishListPage(driver);
     }
 

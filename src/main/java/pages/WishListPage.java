@@ -18,13 +18,11 @@ public class WishListPage extends BasePage {
 
     public void waitForWishListScreen() {
         wait.forElementToBeClickable(ADD_BUTTON);
-//        AllureHelper.attachScreenshot(driver, "Wish list screen");
     }
 
     public WishItemPage clickAddItem() {
         AllureHelper.step("Adding new item to wish list");
         wait.forElementToBeClickable(ADD_BUTTON).click();
-//        AllureHelper.attachScreenshot(driver, "Add item clicked");
         return new WishItemPage(driver);
     }
 
@@ -33,7 +31,6 @@ public class WishListPage extends BasePage {
         By editButtonLocator = By.xpath("(//android.widget.Button[@resource-id='ru.otus.wishlist:id/edit_button'])[" + (index + 1) + "]");
         wait.forElementToBeClickable(editButtonLocator).click();
         sleep(1000);
-//        AllureHelper.attachScreenshot(driver, "Edit item clicked");
         return new WishItemPage(driver);
     }
 
@@ -50,8 +47,6 @@ public class WishListPage extends BasePage {
 
         String newStatus = driver.findElement(switchLocator).getAttribute("checked");
         AllureHelper.attachText("New status", newStatus.equals("true") ? "RESERVED" : "NOT RESERVED");
-//        AllureHelper.attachScreenshot(driver, "Status toggled");
-
         return newStatus;
     }
 
@@ -89,7 +84,6 @@ public class WishListPage extends BasePage {
                 "new UiSelector().text(\"" + wishListName + "\")");
         wait.forElementToBeClickable(wishlistLocator).click();
         sleep(2000);
-//        AllureHelper.attachScreenshot(driver, "Wish list selected");
         return this;
     }
 }

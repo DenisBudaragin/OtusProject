@@ -21,14 +21,12 @@ public class UsersPage extends BasePage {
         AllureHelper.step("Navigating to users tab");
         wait.forElementToBeClickable(USERS_TAB).click();
         sleep(2000);
-//        AllureHelper.attachScreenshot(driver, "Users tab");
     }
 
     public void openFilter() {
         AllureHelper.step("Opening filter");
         wait.forElementToBeClickable(FILTER_BUTTON).click();
         sleep(1000);
-//        AllureHelper.attachScreenshot(driver, "Filter opened");
     }
 
     public void filterByUsername(String username) {
@@ -43,14 +41,12 @@ public class UsersPage extends BasePage {
         AllureHelper.step("Applying filter");
         wait.forElementToBeClickable(APPLY_BUTTON).click();
         sleep(2000);
-//        AllureHelper.attachScreenshot(driver, "Filter applied");
     }
 
     public WishListPage selectFirstUser() {
         AllureHelper.step("Selecting first user from list");
         wait.forElementToBeClickable(USERNAME).click();
         sleep(2000);
-//        AllureHelper.attachScreenshot(driver, "User selected");
         return new WishListPage(driver);
     }
 }

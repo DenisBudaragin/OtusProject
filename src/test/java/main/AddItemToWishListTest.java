@@ -24,43 +24,28 @@ public class AddItemToWishListTest extends BaseTest {
     public void testAddItemToWishList() {
         Allure.step("Login to application");
         MainPage mainPage = loginPage.login(TEST_USERNAME, TEST_PASSWORD);
-
         Allure.step("Open wish list: " + WISH_LIST_NAME);
         WishListPage wishListPage = mainPage.openWishListByName(WISH_LIST_NAME);
         wishListPage.waitForWishListScreen();
-
         Allure.step("Add new item to wish list");
         WishItemPage addItemPage = wishListPage.clickAddItem();
-
         String itemName = randomDataGenerator.randomPhoneModel();
         String itemPrice = randomDataGenerator.randomPrice();
         String itemDescription = randomDataGenerator.randomDescription();
-
         AllureHelper.attachText("New item details",
                 "Name: " + itemName + ", Price: " + itemPrice + ", Description: " + itemDescription);
-
         WishItemPage.WishListItem newItem = addItemPage.createItem(itemName, itemPrice, itemDescription);
-
-//        Allure.step("Verify item was added");
-//        WishListAsserts.assertItemAdded(wishListPage, itemName);
-//        wishListPage.printAllItems();
-
         Allure.step("Edit the first item");
         WishItemPage editItemPage = wishListPage.clickEditButtonForItem(0);
-
         String editedItemName = randomDataGenerator.randomNewPhoneModel();
         String editedItemPrice = randomDataGenerator.randomPrice();
         String editedItemDescription = randomDataGenerator.randomNewDescription();
-
         AllureHelper.attachText("Edited item details",
                 "Name: " + editedItemName + ", Price: " + editedItemPrice + ", Description: " + editedItemDescription);
-
         editItemPage.editItem(editedItemName, editedItemPrice, editedItemDescription);
-
         Allure.step("Verify item was edited");
         WishListAsserts.assertItemEdited(wishListPage, itemName, editedItemName);
         wishListPage.printAllItems();
-
         AllureHelper.attachText("Test result", "✅ Тест успешно завершен: товар добавлен и отредактирован");
     }
 }

@@ -15,7 +15,6 @@ public class LoginPage extends BasePage {
 
     public void waitForLoginScreen() {
         wait.forPresenceOfElement(USERNAME_INPUT);
-//        AllureHelper.attachScreenshot(driver, "Login screen loaded");
     }
 
     public void enterUsername(String username) {
@@ -40,7 +39,6 @@ public class LoginPage extends BasePage {
         enterPassword(password);
         clickLoginButton();
         sleep(3000);
-//        AllureHelper.attachScreenshot(driver, "After login attempt");
         return new MainPage(driver);
     }
 

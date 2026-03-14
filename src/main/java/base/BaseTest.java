@@ -57,13 +57,9 @@ public class BaseTest {
         capabilities.setCapability("appium:uiautomator2ServerInstallTimeout", 120000);
         capabilities.setCapability("appium:androidInstallTimeout", 120000);
 
-        // Подключаемся к Appium серверу
         driver = new AndroidDriver(new URL(APPIUM_SERVER_URL), capabilities);
-
         wait = new WebDriverWait(driver, Duration.ofSeconds(30));
         longWait = new WebDriverWait(driver, Duration.ofSeconds(60));
-
-        // Инициализация страниц и helpers
         loginPage = new LoginPage(driver);
         profilePage = new ProfilePage(driver);
         randomDataGenerator = new RandomDataGenerator();
@@ -71,7 +67,6 @@ public class BaseTest {
         System.out.println("✅ Сессия создана!");
         System.out.println("Session ID: " + driver.getSessionId());
 
-        // Проверяем, не остались ли мы в приложении после предыдущего теста
         try {
             // Если мы уже на главном экране (не на логине), выполняем выход
             if (!loginPage.isLoginScreenDisplayed()) {
@@ -93,7 +88,6 @@ public class BaseTest {
         } catch (Exception e) {
             System.err.println("❌ Ошибка в процессе выхода из аккаунта: " + e.getMessage());
         } finally {
-            // Этот блок выполнится ВСЕГДА, даже если были исключения выше
             if (driver != null) {
                 driver.quit();
                 System.out.println("✅ Сессия закрыта");
@@ -106,7 +100,6 @@ public class BaseTest {
 
     protected void performLogout() {
         try {
-            // Навигация на вкладку профиля (третья вкладка)
             try {
                 By profileTabLocator = By.xpath("(//android.widget.ImageView[@resource-id=\"ru.otus.wishlist:id/navigation_bar_item_icon_view\"])[3]");
                 wait.until(ExpectedConditions.elementToBeClickable(profileTabLocator)).click();
@@ -124,15 +117,11 @@ public class BaseTest {
                     return; // Выходим из метода, если не можем найти профиль
                 }
             }
-
-            // Находим и нажимаем кнопку выхода
             try {
                 By logoutButtonLocator = By.id("ru.otus.wishlist:id/log_out_button");
                 wait.until(ExpectedConditions.elementToBeClickable(logoutButtonLocator)).click();
                 System.out.println("✅ Кнопка выхода нажата");
                 Thread.sleep(1000);
-
-                // Подтверждение выхода, если появляется диалоговое окно
                 try {
                     By confirmLogoutLocator = By.id("android:id/button1");
                     if (driver.findElements(confirmLogoutLocator).size() > 0) {
@@ -143,8 +132,6 @@ public class BaseTest {
                 } catch (Exception e) {
                     System.out.println("ℹ️ Диалог подтверждения не появился");
                 }
-
-                // Проверяем, что произошел выход (появилась форма авторизации)
                 wait.until(ExpectedConditions.presenceOfElementLocated(
                         By.id("ru.otus.wishlist:id/username_text_input")));
                 System.out.println("✅ Выход из аккаунта выполнен успешно");

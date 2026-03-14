@@ -17,7 +17,6 @@ public class WishItemPage extends BasePage {
 
     public void waitForItemForm() {
         wait.forPresenceOfElement(NAME_INPUT);
-//        AllureHelper.attachScreenshot(driver, "Item form loaded");
     }
 
     public void enterItemName(String name) {
@@ -49,7 +48,6 @@ public class WishItemPage extends BasePage {
         elementActions.click(SAVE_BUTTON);
         AllureHelper.attachText("Save clicked", "Saving changes");
         sleep(2000);
-//        AllureHelper.attachScreenshot(driver, "After save");
     }
 
     public WishListItem createItem(String name, String price, String description) {

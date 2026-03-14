@@ -6,7 +6,6 @@ import pages.WishListPage;
 import org.junit.jupiter.api.Assertions;
 
 public class WishListAsserts {
-
     public static void assertWishListCreated(MainPage mainPage, String wishListName) {
         boolean isDisplayed = mainPage.isWishListDisplayed(wishListName);
         AllureHelper.attachText("Wish list created check",
@@ -14,7 +13,6 @@ public class WishListAsserts {
         Assertions.assertTrue(isDisplayed,
                 "Wish list '" + wishListName + "' should be displayed after creation");
     }
-
     public static void assertWishListEdited(MainPage mainPage, String oldTitle, String newTitle) {
         boolean oldNotFound = !mainPage.isWishListDisplayed(oldTitle);
         boolean newFound = mainPage.isWishListDisplayed(newTitle);
@@ -27,7 +25,6 @@ public class WishListAsserts {
         Assertions.assertTrue(newFound,
                 "New wish list title '" + newTitle + "' should be displayed after editing");
     }
-
     public static void assertItemAdded(WishListPage wishListPage, String itemName) {
         boolean isDisplayed = wishListPage.isItemDisplayed(itemName);
         AllureHelper.attachText("Item added check",
@@ -35,7 +32,6 @@ public class WishListAsserts {
         Assertions.assertTrue(isDisplayed,
                 "Item '" + itemName + "' should be displayed after adding");
     }
-
     public static void assertItemEdited(WishListPage wishListPage, String oldName, String newName) {
         boolean oldNotFound = !wishListPage.isItemDisplayed(oldName);
         boolean newFound = wishListPage.isItemDisplayed(newName);

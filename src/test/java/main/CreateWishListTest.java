@@ -22,42 +22,29 @@ public class CreateWishListTest extends BaseTest {
     public void testCreateWishList() {
         Allure.step("Login to application");
         MainPage mainPage = loginPage.login(TEST_USERNAME, TEST_PASSWORD);
-        //AllureHelper.attachScreenshot(driver, "After login");
-
         Allure.step("Create new wish list");
         mainPage.clickAddButton();
-
         WishItemPage wishItemPage = new WishItemPage(driver);
-
         String wishListTitle = randomDataGenerator.randomWishListTitle();
         String wishListDescription = "Autotest 15 Pro Max, 256GB, черный";
-
         AllureHelper.attachText("New wish list details",
                 "Title: " + wishListTitle + ", Description: " + wishListDescription);
-
         wishItemPage.enterWishListTitle(wishListTitle);
         wishItemPage.enterWishListDescription(wishListDescription);
         wishItemPage.clickSave();
-
         Allure.step("Verify wish list was created");
         WishListAsserts.assertWishListCreated(mainPage, wishListTitle);
         mainPage.printAllWishLists();
-
         Allure.step("Edit the created wish list");
         WishListPage wishListPage = mainPage.openFirstWishList();
-
         String editedTitle = randomDataGenerator.randomEditedWishListTitle();
         AllureHelper.attachText("Edited title", editedTitle);
-
         WishItemPage editPage = wishListPage.clickEditButtonForItem(1);
         editPage.enterWishListTitle(editedTitle);
         editPage.clickSave();
-
         Allure.step("Verify wish list was edited");
         WishListAsserts.assertWishListEdited(mainPage, wishListTitle, editedTitle);
         mainPage.printAllWishLists();
-
-        //AllureHelper.attachScreenshot(driver, "Final state");
         AllureHelper.attachText("Test result", "✅ Тест успешно завершен: пункт добавлен и отредактирован");
     }
 }

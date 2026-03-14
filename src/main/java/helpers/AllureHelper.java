@@ -19,16 +19,6 @@ public class AllureHelper {
         Allure.addAttachment(name, "text/plain", content);
     }
 
-//    public static void attachScreenshot(AndroidDriver driver, String name) {
-//        try {
-//            byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
-//            Allure.addAttachment(name + " - " + getCurrentTimestamp(),
-//                    new ByteArrayInputStream(screenshot));
-//        } catch (Exception e) {
-//            attachText("Screenshot failed for: " + name, e.getMessage());
-//        }
-//    }
-
     public static String attachPageSource(AndroidDriver driver) {
         String pageSource = driver.getPageSource();
         Allure.addAttachment("Page Source", "text/xml", pageSource);
