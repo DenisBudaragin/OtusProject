@@ -1,50 +1,56 @@
 package pages;
 
-import helpers.BaseTest;
+import helpers.AllureHelper;
+import io.appium.java_client.android.AndroidDriver;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import static org.junit.jupiter.api.Assertions.*;
-import java.time.Duration;
-import java.util.List;
-import java.util.Random;
 
-import static configa.Config.OTUS_MAIN_PAGE;
+public class MainPage extends BasePage {
+    private static final By ADD_BUTTON = By.id("ru.otus.wishlist:id/add_button");
+    private static final By WISH_LIST_TITLE = By.id("ru.otus.wishlist:id/title");
+    private static final By WISH_LIST_TITLE_TEXT = By.id("ru.otus.wishlist:id/title_text");
 
-public class MainPage extends BaseTest {
-    public static void open() {
-        driver.get(OTUS_MAIN_PAGE);
+    public MainPage(AndroidDriver driver) {
+        super(driver);
     }
 
-    public static void clickOnCategory(String categoryName) {
-        // Ожидание загрузки страницы
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(driver -> {
-            return ((JavascriptExecutor) driver).executeScript("return document.readyState").equals("complete");
-        });
-        WebElement categoryLink = findElement(
-                By.xpath(String.format("//*[text()='%s']", categoryName))
-        );
-        categoryLink.click();
+    public void waitForMainScreen() {
+        wait.forElementToBeClickable(ADD_BUTTON);
+//        AllureHelper.attachScreenshot(driver, "Main screen loaded");
     }
 
-    public static String clickRandomCourseInCategory(String categoryXpath) {
-        List<WebElement> courseElements = driver.findElements(By.xpath(categoryXpath));
-        assertFalse(courseElements.isEmpty(), "В категории нет доступных курсов");
-        Random random = new Random();
-        int randomIndex = random.nextInt(courseElements.size());
-        WebElement randomElement = courseElements.get(randomIndex);
-        String expectedUrl = getElementUrl(randomElement);
-        randomElement.click();
-        return expectedUrl;
+    public void clickAddButton() {
+        elementActions.click(ADD_BUTTON);
+        AllureHelper.attachText("Clicked add button", "Creating new wish list/item");
     }
 
-    public static String getElementUrl(WebElement element) {
-        return element.getAttribute("href");
+    public WishListPage openWishListByName(String wishListName) {
+        AllureHelper.step("Opening wish list: " + wishListName);
+        By wishListLocator = By.xpath("//android.widget.TextView[@resource-id='ru.otus.wishlist:id/title' and @text='" + wishListName + "']");
+        wait.forElementToBeClickable(wishListLocator).click();
+//        AllureHelper.attachScreenshot(driver, "Wish list opened");
+        return new WishListPage(driver);
     }
 
-    public static String getCurrentPageUrl() {
-        return driver.getCurrentUrl();
+    public WishListPage openFirstWishList() {
+        AllureHelper.step("Opening first wish list");
+        By firstWishListLocator = By.xpath("(//android.widget.TextView[@resource-id='ru.otus.wishlist:id/title'])[1]");
+        wait.forElementToBeClickable(firstWishListLocator).click();
+//        AllureHelper.attachScreenshot(driver, "First wish list opened");
+        return new WishListPage(driver);
+    }
+
+    public boolean isWishListDisplayed(String wishListName) {
+        return elementActions.isElementDisplayed(By.xpath("//*[@text='" + wishListName + "']"));
+    }
+
+    public void printAllWishLists() {
+        AllureHelper.step("Printing all wish lists");
+        var elements = driver.findElements(WISH_LIST_TITLE_TEXT);
+        for (var element : elements) {
+            String text = element.getText();
+            if (text != null && !text.isEmpty()) {
+                AllureHelper.attachText("Wish list found", text);
+            }
+        }
     }
 }

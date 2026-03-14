@@ -1,37 +1,46 @@
 package helpers;
 
-import io.qameta.allure.Attachment;
+import io.appium.java_client.android.AndroidDriver;
+import io.qameta.allure.Allure;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayInputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class AllureHelper {
-    private static final Logger log = LoggerFactory.getLogger(AllureHelper.class);
 
-    @Attachment(value = "Скриншот при падении теста", type = "image/png")
-    public static byte[] takeScreenshot(WebDriver driver) {
-        if (driver == null) {
-            log.warn("WebDriver is null, cannot take screenshot");
-            return new byte[0];
-        }
-        try {
-            return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
-        } catch (Exception e) {
-            log.error("Failed to take screenshot: {}", e.getMessage());
-            return new byte[0];
-        }
+    public static void step(String stepName) {
+        Allure.step(stepName);
     }
 
-    @Attachment(value = "{0}", type = "text/plain")
-    public static String attachText(String name, String content) {
-        return content;
+    public static void attachText(String name, String content) {
+        Allure.addAttachment(name, "text/plain", content);
     }
 
-    @Attachment(value = "HTML страницы", type = "text/html")
-    public static String attachPageSource(WebDriver driver) {
-        if (driver == null) return "";
-        return driver.getPageSource();
+//    public static void attachScreenshot(AndroidDriver driver, String name) {
+//        try {
+//            byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+//            Allure.addAttachment(name + " - " + getCurrentTimestamp(),
+//                    new ByteArrayInputStream(screenshot));
+//        } catch (Exception e) {
+//            attachText("Screenshot failed for: " + name, e.getMessage());
+//        }
+//    }
+
+    public static String attachPageSource(AndroidDriver driver) {
+        String pageSource = driver.getPageSource();
+        Allure.addAttachment("Page Source", "text/xml", pageSource);
+        return pageSource;
+    }
+
+    public static void attachEnvironmentInfo() {
+        Allure.addAttachment("Environment", "text/plain",
+                "Platform: Android 13\nDevice: redroid13\nApp: ru.otus.wishlist");
+    }
+
+    private static String getCurrentTimestamp() {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 }
